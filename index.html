@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Azure DevOps Pull Requests</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 20px;
+      font-family: Arial, sans-serif;
+      transition: background 0.3s, color 0.3s;
+      position: relative; /* so we can position the toggle theme button absolutely */
+    }
+    h1 {
+      margin-bottom: 10px;
+      transition: color 0.3s;
+    }
+    a {
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Theme toggle button in the top-right corner */
+    .toggle-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      background: #0078d4;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .toggle-button:hover {
+      background: #005ea1;
+    }
+
+    /* Empty state message styling */
+    .empty-state-message {
+      text-align: center;
+      font-size: 18px;
+      padding: 30px;
+      width: 100%;
+    }
+
+    .horizontal-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .input-group label {
+      margin-bottom: 4px;
+    }
+    input[type='text'],
+    input[type='password'] {
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    input[type='checkbox'] {
+      margin-right: 5px;
+    }
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .hidden {
+      display: none;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      transition: background 0.3s, color 0.3s;
+    }
+    .pagination {
+      margin-top: 10px;
+    }
+    .pagination button {
+      margin: 0 3px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .pagination .current-page {
+      opacity: 0.85;
+    }
+
+    /*******************************************************
+     * Table Styles
+     *******************************************************/
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    thead th,
+    tbody td {
+      text-align: left;
+      border-bottom: 1px solid;
+      padding: 12px 16px; /* spacing for clarity */
+    }
+
+    /*******************************************************
+     * New Project Grid Styles
+     *******************************************************/
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* 2 columns */
+      gap: 12px; /* spacing between items */
+      margin-top: 8px;
+    }
+    .project-item {
+      display: flex;
+      align-items: center;
+    }
+    .project-item label {
+      margin-left: 5px;
+      cursor: pointer;
+    }
+
+    /*******************************************************
+     * Light & Dark Themes
+     *******************************************************/
+    /* Light Mode */
+    body.light-mode {
+      background: #f4f4f4;
+      color: #1e1e1e;
+    }
+    body.light-mode a {
+      color: #005ea1;
+    }
+    body.light-mode .empty-state-message {
+      color: #555555;
+    }
+    body.light-mode input[type='text'],
+    body.light-mode input[type='password'] {
+      background: #fff;
+      color: #1e1e1e;
+      border-color: #ccc;
+    }
+    body.light-mode .btn {
+      background: #0078d4;
+      color: #fff;
+    }
+    body.light-mode .btn:hover {
+      background: #005ea1;
+    }
+    body.light-mode .results {
+      background: #fff;
+    }
+    body.light-mode .pagination button {
+      background-color: #ddd;
+      color: #000;
+    }
+    body.light-mode .pagination button.current-page {
+      background-color: #0078d4;
+      color: #fff;
+    }
+
+    /* Dark Mode */
+    body.dark-mode {
+      background: #1e1e1e;
+      color: #f3f3f3;
+    }
+    body.dark-mode a {
+      color: #79bdfd;
+    }
+    body.dark-mode .empty-state-message {
+      color: #b0b0b0;
+    }
+    body.dark-mode input[type='text'],
+    body.dark-mode input[type='password'] {
+      background: #2b2b2b;
+      color: #fff;
+      border-color: #3f3f3f;
+    }
+    body.dark-mode .btn {
+      background: #0078d4;
+      color: #fff;
+    }
+    body.dark-mode .btn:hover {
+      background: #005ea1;
+    }
+    body.dark-mode .results {
+      background: #2b2b2b;
+    }
+    body.dark-mode .pagination button {
+      background-color: #3f3f3f;
+      color: #fff;
+    }
+    body.dark-mode .pagination button.current-page {
+      background-color: #0078d4;
+      color: #fff;
+    }
+  </style>
+</head>
+<body class="light-mode">
+  <h1>Azure DevOps Pull Requests Overview</h1>
+
+  <!-- Theme toggle button in top-right corner -->
+  <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
+
+  <!-- Horizontal input row for Org & PAT -->
+  <div class="horizontal-inputs">
+    <div class="input-group">
+      <label for="organization">Organization:</label>
+      <input type="text" id="organization" placeholder="Your organization name" required>
+    </div>
+    <div class="input-group">
+      <label for="pat">Personal Access Token:</label>
+      <input type="password" id="pat" placeholder="Your PAT" required>
+    </div>
+    <button class="btn" onclick="connectAndFetchProjects()">Connect</button>
+  </div>
+
+  <!-- Project selection hidden until connected -->
+  <div id="projectContainer" class="hidden">
+    <h2>Select Projects</h2>
+    <!-- Use the grid here -->
+    <div id="projectList" class="project-grid"></div>
+    <div class="pagination" id="projectPagination"></div>
+  </div>
+
+  <!-- Button to fetch PRs -->
+  <button id="fetchPrsBtn" class="btn hidden" onclick="fetchPullRequests()">
+    Fetch Pull Requests
+  </button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    /********************************************
+     * THEME TOGGLE
+     ********************************************/
+    function toggleTheme() {
+      const body = document.body;
+      if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        body.classList.add('dark-mode');
+      } else {
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+      }
+    }
+
+    let authHeader = '';
+    let allProjects = [];
+    let currentProjectPage = 1;
+    const itemsPerProjectPage = 10; // We'll show 10 projects per page
+
+    // We'll track which projects are "selected" across pages.
+    // We'll store them by project name in a Set.
+    const selectedProjects = new Set();
+
+    /********************************************
+     * FETCH PROJECTS
+     ********************************************/
+    async function connectAndFetchProjects() {
+      const organization = document.getElementById('organization').value.trim();
+      const pat = document.getElementById('pat').value.trim();
+      const projectContainer = document.getElementById('projectContainer');
+      const projectList = document.getElementById('projectList');
+      const fetchPrsBtn = document.getElementById('fetchPrsBtn');
+      const resultsDiv = document.getElementById('results');
+      const projectPagination = document.getElementById('projectPagination');
+
+      // Clear previous state
+      resultsDiv.innerHTML = '';
+      projectList.innerHTML = '';
+      projectPagination.innerHTML = '';
+      allProjects = [];
+      currentProjectPage = 1;
+      selectedProjects.clear(); // Reset selection
+
+      if (!organization || !pat) {
+        resultsDiv.innerHTML = '<p>Please provide both organization and PAT.</p>';
+        return;
+      }
+
+      // Convert PAT to Base64 for Basic Auth
+      authHeader = 'Basic ' + btoa(':' + pat);
+
+      const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1`;
+
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        allProjects = data.value || [];
+
+        if (allProjects.length > 0) {
+          // Show project container
+          projectContainer.classList.remove('hidden');
+          fetchPrsBtn.classList.remove('hidden');
+
+          // Render the first page of projects
+          renderProjectPage(allProjects, currentProjectPage, itemsPerProjectPage);
+          setupProjectPagination(allProjects, itemsPerProjectPage);
+        } else {
+          resultsDiv.innerHTML = '<p>No projects found or you do not have access.</p>';
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        resultsDiv.innerHTML = `<p>Error fetching projects: ${error.message}</p>`;
+      }
+    }
+
+    /********************************************
+     * PAGINATION: PROJECTS
+     ********************************************/
+    function renderProjectPage(projects, page, itemsPerPage) {
+      const projectList = document.getElementById('projectList');
+      projectList.innerHTML = '';
+
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageProjects = projects.slice(startIndex, endIndex);
+
+      pageProjects.forEach(proj => {
+        // Container for each project entry
+        const container = document.createElement('div');
+        container.classList.add('project-item');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'projects';
+        checkbox.value = proj.name;
+        // Assign an ID matching the project name
+        checkbox.id = proj.name;
+
+        // If previously selected, keep it checked
+        if (selectedProjects.has(proj.name)) {
+          checkbox.checked = true;
+        }
+
+        // Listen for changes and update the global selection set
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            selectedProjects.add(proj.name);
+          } else {
+            selectedProjects.delete(proj.name);
+          }
+        });
+
+        // Create label, link it to the checkbox via htmlFor
+        const label = document.createElement('label');
+        label.textContent = proj.name;
+        label.htmlFor = proj.name;
+
+        container.appendChild(checkbox);
+        container.appendChild(label);
+        projectList.appendChild(container);
+      });
+    }
+
+    function setupProjectPagination(projects, itemsPerPage) {
+      const projectPagination = document.getElementById('projectPagination');
+      projectPagination.innerHTML = '';
+
+      const totalPages = Math.ceil(projects.length / itemsPerPage);
+
+      for (let page = 1; page <= totalPages; page++) {
+        const button = document.createElement('button');
+        button.textContent = page;
+        if (page === currentProjectPage) {
+          button.classList.add('current-page');
+        }
+        button.addEventListener('click', () => {
+          currentProjectPage = page;
+          renderProjectPage(projects, currentProjectPage, itemsPerPage);
+          setupProjectPagination(projects, itemsPerPage);
+        });
+        projectPagination.appendChild(button);
+      }
+    }
+
+    /********************************************
+     * FETCH & DISPLAY ALL PULL REQUESTS COMBINED
+     ********************************************/
+    async function fetchPullRequests() {
+      const organization = document.getElementById('organization').value.trim();
+      const resultsDiv = document.getElementById('results');
+
+      resultsDiv.innerHTML = '';
+
+      // The user might have selected multiple pages, so read from our global set
+      const checkedProjects = Array.from(selectedProjects);
+
+      if (!organization || !authHeader || checkedProjects.length === 0) {
+        resultsDiv.innerHTML = '<p>Please connect and select at least one project.</p>';
+        return;
+      }
+
+      // We'll store all PRs from all selected projects in a single array
+      const allPRs = [];
+
+      // Fetch PRs per project
+      for (const projectName of checkedProjects) {
+        const url = `https://dev.azure.com/${organization}/${projectName}/_apis/git/pullrequests?api-version=7.1`;
+
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': authHeader,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          const data = await response.json();
+          const prList = data.value;
+
+          if (prList && prList.length > 0) {
+            // Append each PR to the combined array, but also store the project name
+            prList.forEach(pr => {
+              pr.projectName = projectName; // Add project name so we can display it
+              allPRs.push(pr);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching PRs:', error);
+          const errMsg = document.createElement('p');
+          errMsg.textContent = `Error fetching PRs for project: ${projectName} - ${error.message}`;
+          resultsDiv.appendChild(errMsg);
+        }
+      }
+
+      // Once we've fetched all, let's display them in a single table
+      if (allPRs.length === 0) {
+        // If no PRs across all selected projects
+        const noPrsMsg = document.createElement('p');
+        noPrsMsg.textContent = "That's it, there is no review work left!";
+        noPrsMsg.classList.add('empty-state-message');
+        resultsDiv.appendChild(noPrsMsg);
+        return;
+      }
+
+      const heading = document.createElement('h2');
+      heading.textContent = 'Open Pull Requests';
+      resultsDiv.appendChild(heading);
+
+      // Create a table for all PRs
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      thead.innerHTML = `
+        <tr>
+          <th>Project</th>
+          <th>Pull Request</th>
+          <th>Repository</th>
+          <th>Source Branch</th>
+          <th>Target Branch</th>
+          <th>Opened By</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      allPRs.forEach(pr => {
+        const sourceBranch = pr.sourceRefName.replace('refs/heads/', '');
+        const targetBranch = pr.targetRefName.replace('refs/heads/', '');
+
+        const tr = document.createElement('tr');
+
+        // Project
+        const projectCell = document.createElement('td');
+        projectCell.textContent = pr.projectName;
+        tr.appendChild(projectCell);
+
+        // Pull Request (Link)
+        const prCell = document.createElement('td');
+        const prLink = document.createElement('a');
+        prLink.textContent = `${pr.title} (#${pr.pullRequestId})`;
+        prLink.href = `https://dev.azure.com/${organization}/${pr.projectName}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`;
+        prLink.target = '_blank';
+        prCell.appendChild(prLink);
+        tr.appendChild(prCell);
+
+        // Repository
+        const repoCell = document.createElement('td');
+        repoCell.textContent = pr.repository.name;
+        tr.appendChild(repoCell);
+
+        // Source Branch
+        const sourceCell = document.createElement('td');
+        sourceCell.textContent = sourceBranch;
+        tr.appendChild(sourceCell);
+
+        // Target Branch
+        const targetCell = document.createElement('td');
+        targetCell.textContent = targetBranch;
+        tr.appendChild(targetCell);
+
+        // Opened By
+        const openedByCell = document.createElement('td');
+        openedByCell.textContent = pr.createdBy?.displayName || 'Unknown';
+        tr.appendChild(openedByCell);
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      resultsDiv.appendChild(table);
+    }
+  </script>
+</body>
+</html>
