@@ -118,7 +118,7 @@
       color: #0078d4;
       font-weight: bold;
     }
-    
+
     body.dark-mode .countdown {
       color: #79bdfd;
     }
@@ -534,13 +534,13 @@
     // Start the refresh timer
     function startRefreshTimer() {
       const interval = parseInt(document.getElementById('refreshInterval').value);
-      
+
       // Clear any existing timer
       stopRefreshTimer();
 
       // Calculate next refresh time
       nextRefreshTime = new Date(Date.now() + interval);
-      
+
       // Start countdown display
       startCountdown(interval);
 
@@ -563,7 +563,7 @@
         clearInterval(refreshTimer);
         refreshTimer = null;
       }
-      
+
       // Also stop the countdown
       if (countdownInterval) {
         clearInterval(countdownInterval);
@@ -574,42 +574,42 @@
     // Start the countdown display
     function startCountdown(totalMs) {
       const countdownEl = document.getElementById('countdownTimer');
-      
+
       // Clear any existing countdown
       if (countdownInterval) {
         clearInterval(countdownInterval);
       }
-      
+
       // Update countdown immediately
       updateCountdownDisplay();
-      
+
       // Update countdown every second
       countdownInterval = setInterval(() => {
         updateCountdownDisplay();
       }, 1000);
     }
-    
+
     // Update the countdown display
     function updateCountdownDisplay() {
       const countdownEl = document.getElementById('countdownTimer');
-      
+
       if (!nextRefreshTime) {
         countdownEl.textContent = 'Next refresh: waiting...';
         return;
       }
-      
+
       const now = new Date();
       const timeRemaining = nextRefreshTime - now;
-      
+
       if (timeRemaining <= 0) {
         countdownEl.textContent = 'Refreshing now...';
         return;
       }
-      
+
       // Format the time remaining
       const minutes = Math.floor(timeRemaining / 60000);
       const seconds = Math.floor((timeRemaining % 60000) / 1000);
-      
+
       // Display with leading zeros for seconds
       const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
       countdownEl.textContent = `Next refresh in: ${formattedTime}`;
