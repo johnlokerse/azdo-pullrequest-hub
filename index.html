@@ -112,6 +112,17 @@
       font-style: italic;
     }
 
+    .countdown {
+      font-size: 0.9em;
+      margin-left: 10px;
+      color: #0078d4;
+      font-weight: bold;
+    }
+    
+    body.dark-mode .countdown {
+      color: #79bdfd;
+    }
+
     .results {
       margin-top: 20px;
       padding: 15px;
@@ -314,6 +325,7 @@
       <option value="1800000">Every 30 minutes</option>
     </select>
     <span id="lastRefreshed" class="last-refreshed hidden">Last refreshed: Never</span>
+    <span id="countdownTimer" class="countdown hidden">Next refresh in: 5:00</span>
   </div>
 
   <div class="results" id="results"></div>
@@ -489,6 +501,7 @@
     function toggleAutoRefresh() {
       const checkbox = document.getElementById('autoRefreshToggle');
       const lastRefreshedSpan = document.getElementById('lastRefreshed');
+      const countdownTimer = document.getElementById('countdownTimer');
 
       autoRefreshEnabled = checkbox.checked;
 
@@ -496,10 +509,12 @@
         // Start the timer
         startRefreshTimer();
         lastRefreshedSpan.classList.remove('hidden');
+        countdownTimer.classList.remove('hidden');
       } else {
         // Stop the timer
         stopRefreshTimer();
         lastRefreshedSpan.classList.add('hidden');
+        countdownTimer.classList.add('hidden');
       }
     }
 
@@ -512,17 +527,29 @@
       }
     }
 
+    // Countdown variables
+    let countdownInterval = null;
+    let nextRefreshTime = null;
+
     // Start the refresh timer
     function startRefreshTimer() {
       const interval = parseInt(document.getElementById('refreshInterval').value);
-
+      
       // Clear any existing timer
       stopRefreshTimer();
+
+      // Calculate next refresh time
+      nextRefreshTime = new Date(Date.now() + interval);
+      
+      // Start countdown display
+      startCountdown(interval);
 
       // Set the new timer
       refreshTimer = setInterval(() => {
         fetchPullRequests();
         updateLastRefreshedTime();
+        // Reset the countdown after each refresh
+        nextRefreshTime = new Date(Date.now() + interval);
       }, interval);
 
       // Initial refresh
@@ -536,6 +563,56 @@
         clearInterval(refreshTimer);
         refreshTimer = null;
       }
+      
+      // Also stop the countdown
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    }
+
+    // Start the countdown display
+    function startCountdown(totalMs) {
+      const countdownEl = document.getElementById('countdownTimer');
+      
+      // Clear any existing countdown
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+      
+      // Update countdown immediately
+      updateCountdownDisplay();
+      
+      // Update countdown every second
+      countdownInterval = setInterval(() => {
+        updateCountdownDisplay();
+      }, 1000);
+    }
+    
+    // Update the countdown display
+    function updateCountdownDisplay() {
+      const countdownEl = document.getElementById('countdownTimer');
+      
+      if (!nextRefreshTime) {
+        countdownEl.textContent = 'Next refresh: waiting...';
+        return;
+      }
+      
+      const now = new Date();
+      const timeRemaining = nextRefreshTime - now;
+      
+      if (timeRemaining <= 0) {
+        countdownEl.textContent = 'Refreshing now...';
+        return;
+      }
+      
+      // Format the time remaining
+      const minutes = Math.floor(timeRemaining / 60000);
+      const seconds = Math.floor((timeRemaining % 60000) / 1000);
+      
+      // Display with leading zeros for seconds
+      const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      countdownEl.textContent = `Next refresh in: ${formattedTime}`;
     }
 
     // Update the last refreshed time indicator
