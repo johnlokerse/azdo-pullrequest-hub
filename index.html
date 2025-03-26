@@ -123,6 +123,33 @@
       color: #79bdfd;
     }
 
+    /* PR Age Indicator Styles */
+    .pr-age-normal {
+      background-color: transparent;
+    }
+
+    .pr-age-warning {
+      background-color: #FFA500;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: white;
+    }
+
+    .pr-age-critical {
+      background-color: #FF4500;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: white;
+    }
+
+    body.dark-mode .pr-age-warning {
+      background-color: #B37700;
+    }
+
+    body.dark-mode .pr-age-critical {
+      background-color: #A52A2A;
+    }
+
     .results {
       margin-top: 20px;
       padding: 15px;
@@ -703,6 +730,7 @@
           <th>Repository</th>
           <th>Source Branch</th>
           <th>Target Branch</th>
+          <th>Age</th>
           <th>Opened By</th>
         </tr>
       `;
@@ -743,6 +771,27 @@
         const targetCell = document.createElement('td');
         targetCell.textContent = targetBranch;
         tr.appendChild(targetCell);
+
+        // Age (in days)
+        const ageCell = document.createElement('td');
+        const createdDate = new Date(pr.creationDate);
+        const now = new Date();
+        const daysOld = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+
+        const ageSpan = document.createElement('span');
+        ageSpan.textContent = `${daysOld} days`;
+
+        // Apply styling based on age
+        if (daysOld > 7) {
+          ageSpan.className = 'pr-age-critical';
+        } else if (daysOld > 3) {
+          ageSpan.className = 'pr-age-warning';
+        } else {
+          ageSpan.className = 'pr-age-normal';
+        }
+
+        ageCell.appendChild(ageSpan);
+        tr.appendChild(ageCell);
 
         // Opened By
         const openedByCell = document.createElement('td');
