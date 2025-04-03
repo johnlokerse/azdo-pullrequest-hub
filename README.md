@@ -66,3 +66,17 @@ The application offers real-time monitoring with auto-refresh capabilities, maki
 - Your Personal Access Token is used only for API authentication and is never stored on any server
 - All data processing happens in your browser
 - No data is sent to any third-party services
+
+### Running the Application
+
+The Azure DevOps Pull Request Hub is a simple HTML-based application that runs entirely in your browser without requiring any server or installation:
+
+1. **Local Usage**:
+   - Download or clone this repository
+   - Simply open the `index.html` file in any modern web browser
+   - That's it! No server setup or build process required
+
+2. **Hosting Options** (optional):
+   - For team access, you can host the HTML file on any web server
+   - Alternatively, use GitHub Pages or any static site hosting service
+  
