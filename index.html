@@ -353,6 +353,13 @@
     </select>
     <span id="lastRefreshed" class="last-refreshed hidden">Last refreshed: Never</span>
     <span id="countdownTimer" class="countdown hidden">Next refresh in: 5:00</span>
+
+    <div class="filter-controls">
+      <label for="hideDraftPRs">
+        <input type="checkbox" id="hideDraftPRs" checked onchange="hideDraftPRsChanged()">
+        Hide draft PRs
+      </label>
+    </div>
   </div>
 
   <div class="results" id="results"></div>
@@ -657,6 +664,7 @@
     async function fetchPullRequests() {
       const organization = document.getElementById('organization').value.trim();
       const resultsDiv = document.getElementById('results');
+      const hideDraftPRs = document.getElementById('hideDraftPRs').checked;
 
       resultsDiv.innerHTML = '';
 
@@ -738,6 +746,10 @@
 
       const tbody = document.createElement('tbody');
       allPRs.forEach(pr => {
+        if (hideDraftPRs && pr.isDraft) {
+          return; // Skip draft PRs if the filter is enabled
+        }
+
         const sourceBranch = pr.sourceRefName.replace('refs/heads/', '');
         const targetBranch = pr.targetRefName.replace('refs/heads/', '');
 
@@ -804,6 +816,24 @@
       table.appendChild(tbody);
       resultsDiv.appendChild(table);
     }
+
+    function hideDraftPRsChanged() {
+      // Save preference to localStorage
+      localStorage.setItem('hideDraftPRs', document.getElementById('hideDraftPRs').checked);
+      fetchPullRequests();
+    }
+
+    // Load user preferences from localStorage
+    function loadUserPreferences() {
+      // Load "hide draft PRs" preference
+      const hideDraftPRsValue = localStorage.getItem('hideDraftPRs');
+      if (hideDraftPRsValue !== null) {
+        document.getElementById('hideDraftPRs').checked = hideDraftPRsValue === 'true';
+      }
+    }
+
+    // Load preferences on page load
+    document.addEventListener('DOMContentLoaded', loadUserPreferences);
   </script>
 </body>
 
