@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Azure DevOps Pull Request Hub is a lightweight web application that provides a centralized overview of open pull requests across multiple projects in your Azure DevOps organization. It helps team members and managers monitor and track pull requests more efficiently without having to navigate through multiple projects individually.
+Azure DevOps Pull Request Hub is a lightweight web application that provides a centralized overview of open pull requests across multiple projects in your Azure DevOps organization. It helps team member monitor and track pull requests more efficiently without having to navigate through multiple projects individually.
 
 The application offers real-time monitoring with auto-refresh capabilities, making it easy to stay updated on pull request activity without manual refreshing. It also provides visual indicators for PR age, helping you identify pull requests that need immediate attention.
 
@@ -79,4 +79,3 @@ The Azure DevOps Pull Request Hub is a simple HTML-based application that runs e
 2. **Hosting Options** (optional):
    - For team access, you can host the HTML file on any web server
    - Alternatively, use GitHub Pages or any static site hosting service
-  
