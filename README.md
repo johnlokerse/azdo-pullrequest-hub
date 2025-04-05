@@ -22,7 +22,7 @@ The application offers real-time monitoring with auto-refresh capabilities, maki
    - Click "New Token"
    - Name your token
    - Set the organization where you want to use the token
-   - For Scopes, select "Custom defined" and ensure "Code (read)" permission is checked
+   - For Scopes, select "Custom defined" and ensure "Code (read) and Project and Team (read)" permission is checked
    - Set an expiration date
    - Click "Create"
    - Copy the generated token (you won't be able to see it again)

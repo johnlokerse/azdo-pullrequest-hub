@@ -467,7 +467,7 @@
   <!-- Project selection hidden until connected -->
   <div id="projectContainer" class="hidden project-management">
     <h2>Select Projects</h2>
-    
+
     <div class="project-search">
       <input type="text" id="projectSearch" placeholder="Search projects..." oninput="filterProjects(this.value)">
       <button class="clear-btn" onclick="clearProjectSearch()">✕</button>
@@ -559,14 +559,13 @@
       const projectList = document.getElementById('projectList');
       const fetchPrsBtn = document.getElementById('fetchPrsBtn');
       const resultsDiv = document.getElementById('results');
-      const projectPagination = document.getElementById('projectPagination');
+
+      // Display loading message
+      resultsDiv.innerHTML = '<p>Connecting to Azure DevOps and loading projects...</p>';
 
       // Clear previous state
-      resultsDiv.innerHTML = '';
       projectList.innerHTML = '';
-      projectPagination.innerHTML = '';
       allProjects = [];
-      currentProjectPage = 1;
       selectedProjects.clear(); // Reset selection
 
       if (!organization || !pat) {
@@ -577,22 +576,33 @@
       // Convert PAT to Base64 for Basic Auth
       authHeader = 'Basic ' + btoa(':' + pat);
 
-      const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1`;
+      // Updated API URL with top parameter to ensure we get all projects
+      const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1&$top=1000`;
 
       try {
+        console.log(`Fetching projects from: ${url}`);
         const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Authorization': authHeader,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         });
 
+        console.log('Response status:', response.status);
+
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
+
         const data = await response.json();
+        console.log('Projects data received:', data);
+
         allProjects = data.value || [];
+        console.log(`Found ${allProjects.length} projects`);
 
         if (allProjects.length > 0) {
           // Show project container
@@ -603,12 +613,19 @@
 
           // Render all projects with the new rendering function
           renderProjectPage(allProjects);
+          resultsDiv.innerHTML = `<p>Successfully loaded ${allProjects.length} projects. Please select the projects you want to monitor.</p>`;
         } else {
-          resultsDiv.innerHTML = '<p>No projects found or you do not have access.</p>';
+          resultsDiv.innerHTML = '<p>No projects found or you do not have access. Please check your organization name and PAT permissions.</p>';
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
-        resultsDiv.innerHTML = `<p>Error fetching projects: ${error.message}</p>`;
+        resultsDiv.innerHTML = `<p>Error fetching projects: ${error.message}</p>
+                               <p>Please check:</p>
+                               <ul>
+                                 <li>Your organization name is correct</li>
+                                 <li>Your PAT has sufficient permissions (needs <code>Read</code> access for <code>Project and Team</code>)</li>
+                                 <li>Your PAT has not expired</li>
+                               </ul>`;
       }
     }
 
@@ -624,44 +641,44 @@
     function renderProjectPage(projects) {
       const projectList = document.getElementById('projectList');
       projectList.innerHTML = '';
-      
+
       // Get recent projects from localStorage
       const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-      
+
       // Sort projects: first recent projects, then alphabetically
       projects.sort((a, b) => {
         const aIsRecent = recentProjects.includes(a.name);
         const bIsRecent = recentProjects.includes(b.name);
-        
+
         if (aIsRecent && !bIsRecent) return -1;
         if (!aIsRecent && bIsRecent) return 1;
-        
+
         return a.name.localeCompare(b.name);
       });
-      
+
       // Render all projects
       projects.forEach(proj => {
         // Container for each project entry
         const container = document.createElement('div');
         container.classList.add('project-item');
-        
+
         // If it's a recently used project, add the recent-project class
         if (recentProjects.includes(proj.name)) {
           container.classList.add('recent-project');
         }
-        
+
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.name = 'projects';
         checkbox.value = proj.name;
         // Assign an ID matching the project name
         checkbox.id = proj.name;
-        
+
         // If previously selected, keep it checked
         if (selectedProjects.has(proj.name)) {
           checkbox.checked = true;
         }
-        
+
         // Listen for changes and update the global selection set
         checkbox.addEventListener('change', () => {
           if (checkbox.checked) {
@@ -672,44 +689,25 @@
           }
           updateSelectedCount();
         });
-        
+
         // Create label, link it to the checkbox via htmlFor
         const label = document.createElement('label');
         label.textContent = proj.name;
         label.htmlFor = proj.name;
-        
+
         container.appendChild(checkbox);
         container.appendChild(label);
         projectList.appendChild(container);
       });
-      
+
       // Update the selected count
       updateSelectedCount();
-      
+
       // Load saved selections into dropdown
       updateSavedSelectionsDropdown();
     }
 
-    function setupProjectPagination(projects, itemsPerPage) {
-      const projectPagination = document.getElementById('projectPagination');
-      projectPagination.innerHTML = '';
-
-      const totalPages = Math.ceil(projects.length / itemsPerPage);
-
-      for (let page = 1; page <= totalPages; page++) {
-        const button = document.createElement('button');
-        button.textContent = page;
-        if (page === currentProjectPage) {
-          button.classList.add('current-page');
-        }
-        button.addEventListener('click', () => {
-          currentProjectPage = page;
-          renderProjectPage(projects, currentProjectPage, itemsPerPage);
-          setupProjectPagination(projects, itemsPerPage);
-        });
-        projectPagination.appendChild(button);
-      }
-    }
+    // Removed the setupProjectPagination function as it's no longer needed with the new UI
 
     /********************************************
      * AUTO-REFRESH FUNCTIONS
@@ -1026,7 +1024,7 @@
     function filterProjects(searchTerm) {
       searchTerm = searchTerm.toLowerCase();
       const projectItems = document.querySelectorAll('.project-item');
-      
+
       let visibleCount = 0;
       projectItems.forEach(item => {
         const projectName = item.querySelector('label').textContent.toLowerCase();
@@ -1037,7 +1035,7 @@
           item.style.display = 'none';
         }
       });
-      
+
       return visibleCount;
     }
 
@@ -1090,14 +1088,14 @@
         alert("Please select at least one project to save");
         return;
       }
-      
+
       const name = prompt("Enter a name for this selection:");
       if (!name) return;
-      
+
       const selections = JSON.parse(localStorage.getItem('projectSelections') || '{}');
       selections[name] = Array.from(selectedProjects);
       localStorage.setItem('projectSelections', JSON.stringify(selections));
-      
+
       updateSavedSelectionsDropdown();
     }
 
@@ -1106,13 +1104,13 @@
       const dropdown = document.getElementById('savedSelections');
       const selectedName = dropdown.value;
       if (!selectedName) return;
-      
+
       const selections = JSON.parse(localStorage.getItem('projectSelections') || '{}');
       const projectList = selections[selectedName];
-      
+
       // Clear existing
       deselectAllProjects();
-      
+
       // Check the ones in the saved selection
       projectList.forEach(projectName => {
         const checkbox = document.getElementById(projectName);
@@ -1121,7 +1119,7 @@
           selectedProjects.add(projectName);
         }
       });
-      
+
       updateSelectedCount();
     }
 
@@ -1129,12 +1127,12 @@
     function updateSavedSelectionsDropdown() {
       const dropdown = document.getElementById('savedSelections');
       const selections = JSON.parse(localStorage.getItem('projectSelections') || '{}');
-      
+
       // Clear existing options except the first one
       while (dropdown.options.length > 1) {
         dropdown.remove(1);
       }
-      
+
       // Add options for each saved selection
       Object.keys(selections).forEach(name => {
         const option = document.createElement('option');
@@ -1148,22 +1146,22 @@
     function updateRecentProjects(projectName) {
       const MAX_RECENT = 5;
       let recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-      
+
       // Remove if already in the list (to avoid duplicates)
       recentProjects = recentProjects.filter(p => p !== projectName);
-      
+
       // Add to the beginning of the list
       recentProjects.unshift(projectName);
-      
+
       // Keep only up to MAX_RECENT projects
       if (recentProjects.length > MAX_RECENT) {
         recentProjects = recentProjects.slice(0, MAX_RECENT);
       }
-      
+
       // Save back to localStorage
       localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
     }
-    
+
     // Load preferences on page load
   </script>
 </body>
