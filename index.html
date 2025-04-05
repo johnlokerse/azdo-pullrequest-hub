@@ -477,17 +477,8 @@
       <div class="action-buttons">
         <button class="btn" onclick="selectAllVisibleProjects()">Select All</button>
         <button class="btn" onclick="deselectAllProjects()">Clear All</button>
-        <button class="btn" onclick="invertSelection()">Invert</button>
       </div>
       <div id="selectedCount">0 selected</div>
-    </div>
-
-    <div class="saved-selections">
-      <select id="savedSelections">
-        <option value="">-- Saved Selections --</option>
-      </select>
-      <button class="btn" onclick="loadSavedSelection()">Load</button>
-      <button class="btn" onclick="saveCurrentSelection()">Save Current</button>
     </div>
 
     <div class="project-container">
@@ -702,9 +693,6 @@
 
       // Update the selected count
       updateSelectedCount();
-
-      // Load saved selections into dropdown
-      updateSavedSelectionsDropdown();
     }
 
     // Removed the setupProjectPagination function as it's no longer needed with the new UI
@@ -1081,88 +1069,6 @@
     function updateSelectedCount() {
       document.getElementById('selectedCount').textContent = `${selectedProjects.size} selected`;
     }
-
-    // Save current project selection
-    function saveCurrentSelection() {
-      if (selectedProjects.size === 0) {
-        alert("Please select at least one project to save");
-        return;
-      }
-
-      const name = prompt("Enter a name for this selection:");
-      if (!name) return;
-
-      const selections = JSON.parse(localStorage.getItem('projectSelections') || '{}');
-      selections[name] = Array.from(selectedProjects);
-      localStorage.setItem('projectSelections', JSON.stringify(selections));
-
-      updateSavedSelectionsDropdown();
-    }
-
-    // Load a saved project selection
-    function loadSavedSelection() {
-      const dropdown = document.getElementById('savedSelections');
-      const selectedName = dropdown.value;
-      if (!selectedName) return;
-
-      const selections = JSON.parse(localStorage.getItem('projectSelections') || '{}');
-      const projectList = selections[selectedName];
-
-      // Clear existing
-      deselectAllProjects();
-
-      // Check the ones in the saved selection
-      projectList.forEach(projectName => {
-        const checkbox = document.getElementById(projectName);
-        if (checkbox) {
-          checkbox.checked = true;
-          selectedProjects.add(projectName);
-        }
-      });
-
-      updateSelectedCount();
-    }
-
-    // Update the saved selections dropdown
-    function updateSavedSelectionsDropdown() {
-      const dropdown = document.getElementById('savedSelections');
-      const selections = JSON.parse(localStorage.getItem('projectSelections') || '{}');
-
-      // Clear existing options except the first one
-      while (dropdown.options.length > 1) {
-        dropdown.remove(1);
-      }
-
-      // Add options for each saved selection
-      Object.keys(selections).forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = `${name} (${selections[name].length} projects)`;
-        dropdown.appendChild(option);
-      });
-    }
-
-    // Update recent projects when a project is selected
-    function updateRecentProjects(projectName) {
-      const MAX_RECENT = 5;
-      let recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-
-      // Remove if already in the list (to avoid duplicates)
-      recentProjects = recentProjects.filter(p => p !== projectName);
-
-      // Add to the beginning of the list
-      recentProjects.unshift(projectName);
-
-      // Keep only up to MAX_RECENT projects
-      if (recentProjects.length > MAX_RECENT) {
-        recentProjects = recentProjects.slice(0, MAX_RECENT);
-      }
-
-      // Save back to localStorage
-      localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
-    }
-
-    // Load preferences on page load
   </script>
 </body>
 
