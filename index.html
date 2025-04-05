@@ -220,12 +220,16 @@
     .project-management {
       background: #f5f5f5;
       border-radius: 8px;
-      padding: 15px;
       margin-bottom: 20px;
+      width: 100%;
     }
 
     body.dark-mode .project-management {
       background: #333;
+    }
+
+    .project-management h2 {
+      margin-top: 0;
     }
 
     .project-search {
@@ -308,7 +312,8 @@
       overflow-y: auto;
       border: 1px solid #ccc;
       border-radius: 5px;
-      margin-top: 10px;
+      margin: 10px 0px;
+      width: auto;
     }
 
     body.dark-mode .project-container {
@@ -679,6 +684,7 @@
             selectedProjects.delete(proj.name);
           }
           updateSelectedCount();
+          saveSelectedProjects(); // Save to localStorage whenever selection changes
         });
 
         // Create label, link it to the checkbox via htmlFor
@@ -1000,6 +1006,19 @@
       if (hideDraftPRsValue !== null) {
         document.getElementById('hideDraftPRs').checked = hideDraftPRsValue === 'true';
       }
+
+      // Load selected projects
+      const savedProjectsString = localStorage.getItem('selectedProjects');
+      if (savedProjectsString) {
+        const savedProjects = JSON.parse(savedProjectsString);
+        // We'll populate the selectedProjects set when projects are loaded
+        savedProjects.forEach(project => selectedProjects.add(project));
+      }
+    }
+
+    // Save selected projects to localStorage
+    function saveSelectedProjects() {
+      localStorage.setItem('selectedProjects', JSON.stringify(Array.from(selectedProjects)));
     }
 
     // Load preferences on page load
@@ -1041,6 +1060,7 @@
         selectedProjects.add(checkbox.value);
       });
       updateSelectedCount();
+      saveSelectedProjects(); // Save to localStorage whenever selection changes
     }
 
     // Deselect all projects
@@ -1050,6 +1070,7 @@
       });
       selectedProjects.clear();
       updateSelectedCount();
+      saveSelectedProjects(); // Save to localStorage whenever selection changes
     }
 
     // Invert the selection of visible projects
@@ -1063,6 +1084,7 @@
         }
       });
       updateSelectedCount();
+      saveSelectedProjects(); // Save to localStorage whenever selection changes
     }
 
     // Update the selected projects count display
