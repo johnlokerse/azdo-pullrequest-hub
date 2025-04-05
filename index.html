@@ -193,7 +193,7 @@
     }
 
     /*******************************************************
-     * New Project Grid Styles
+     * Project Grid Styles
      *******************************************************/
     .project-grid {
       display: grid;
@@ -214,6 +214,149 @@
       cursor: pointer;
     }
 
+    /*******************************************************
+     * Project Grid Styles
+     *******************************************************/
+    .project-management {
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    body.dark-mode .project-management {
+      background: #333;
+    }
+
+    .project-management h2 {
+      margin-top: 0;
+    }
+
+    .project-search {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .project-search input {
+      width: 100%;
+      padding: 8px 30px 8px 10px;
+      border-radius: 4px;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0;
+      height: 20px;
+      width: 20px;
+      line-height: 1;
+      color: #666;
+    }
+
+    body.dark-mode .clear-btn {
+      color: #ccc;
+    }
+
+    .project-selection-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .project-selection-actions .btn {
+      padding: 5px 10px;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    #selectedCount {
+      font-weight: bold;
+    }
+
+    .saved-selections {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .saved-selections select {
+      flex-grow: 1;
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    body.dark-mode .saved-selections select {
+      background: #2b2b2b;
+      color: #fff;
+      border-color: #3f3f3f;
+    }
+
+    .project-container {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin: 10px 0px;
+      width: auto;
+    }
+
+    body.dark-mode .project-container {
+      border-color: #3f3f3f;
+    }
+
+    .project-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    body.dark-mode .project-item {
+      border-bottom: 1px solid #3f3f3f;
+    }
+
+    .project-item:hover {
+      background-color: rgba(0, 120, 212, 0.05);
+    }
+
+    body.dark-mode .project-item:hover {
+      background-color: rgba(0, 120, 212, 0.15);
+    }
+
+    .project-item:last-child {
+      border-bottom: none;
+    }
+    
+    .selected-project {
+      background-color: rgba(0, 120, 212, 0.08);
+    }
+    
+    body.dark-mode .selected-project {
+      background-color: rgba(0, 120, 212, 0.2);
+    }
+    
+    /*******************************************************
+     * New Project Grid Styles (deprecated)
+     *******************************************************/
     /*******************************************************
      * Light & Dark Themes
      *******************************************************/
@@ -327,11 +470,25 @@
   </div>
 
   <!-- Project selection hidden until connected -->
-  <div id="projectContainer" class="hidden">
+  <div id="projectContainer" class="hidden project-management">
     <h2>Select Projects</h2>
-    <!-- Use the grid here -->
-    <div id="projectList" class="project-grid"></div>
-    <div class="pagination" id="projectPagination"></div>
+
+    <div class="project-search">
+      <input type="text" id="projectSearch" placeholder="Search projects..." oninput="filterProjects(this.value)">
+      <button class="clear-btn" onclick="clearProjectSearch()">✕</button>
+    </div>
+
+    <div class="project-selection-actions">
+      <div class="action-buttons">
+        <button class="btn" onclick="selectAllVisibleProjects()">Select All</button>
+        <button class="btn" onclick="deselectAllProjects()">Clear All</button>
+      </div>
+      <div id="selectedCount">0 selected</div>
+    </div>
+
+    <div class="project-container">
+      <div id="projectList" class="project-list"></div>
+    </div>
   </div>
 
   <!-- Button to fetch PRs -->
@@ -398,14 +555,13 @@
       const projectList = document.getElementById('projectList');
       const fetchPrsBtn = document.getElementById('fetchPrsBtn');
       const resultsDiv = document.getElementById('results');
-      const projectPagination = document.getElementById('projectPagination');
+
+      // Display loading message
+      resultsDiv.innerHTML = '<p>Connecting to Azure DevOps and loading projects...</p>';
 
       // Clear previous state
-      resultsDiv.innerHTML = '';
       projectList.innerHTML = '';
-      projectPagination.innerHTML = '';
       allProjects = [];
-      currentProjectPage = 1;
       selectedProjects.clear(); // Reset selection
 
       if (!organization || !pat) {
@@ -416,22 +572,33 @@
       // Convert PAT to Base64 for Basic Auth
       authHeader = 'Basic ' + btoa(':' + pat);
 
-      const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1`;
+      // Updated API URL with top parameter to ensure we get all projects
+      const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1&$top=1000`;
 
       try {
+        console.log(`Fetching projects from: ${url}`);
         const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Authorization': authHeader,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         });
 
+        console.log('Response status:', response.status);
+
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
+
         const data = await response.json();
+        console.log('Projects data received:', data);
+
         allProjects = data.value || [];
+        console.log(`Found ${allProjects.length} projects`);
 
         if (allProjects.length > 0) {
           // Show project container
@@ -440,15 +607,21 @@
           // Show auto-refresh controls
           document.getElementById('autoRefreshControls').classList.remove('hidden');
 
-          // Render the first page of projects
-          renderProjectPage(allProjects, currentProjectPage, itemsPerProjectPage);
-          setupProjectPagination(allProjects, itemsPerPage);
+          // Render all projects with the new rendering function
+          renderProjectPage(allProjects);
+          resultsDiv.innerHTML = `<p>Successfully loaded ${allProjects.length} projects. Please select the projects you want to monitor.</p>`;
         } else {
-          resultsDiv.innerHTML = '<p>No projects found or you do not have access.</p>';
+          resultsDiv.innerHTML = '<p>No projects found or you do not have access. Please check your organization name and PAT permissions.</p>';
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
-        resultsDiv.innerHTML = `<p>Error fetching projects: ${error.message}</p>`;
+        resultsDiv.innerHTML = `<p>Error fetching projects: ${error.message}</p>
+                               <p>Please check:</p>
+                               <ul>
+                                 <li>Your organization name is correct</li>
+                                 <li>Your PAT has sufficient permissions (needs <code>Read</code> access for <code>Project and Team</code>)</li>
+                                 <li>Your PAT has not expired</li>
+                               </ul>`;
       }
     }
 
@@ -461,15 +634,26 @@
     let refreshTimer = null;
     let lastRefreshTime = null;
 
-    function renderProjectPage(projects, page, itemsPerPage) {
+    function renderProjectPage(projects) {
       const projectList = document.getElementById('projectList');
       projectList.innerHTML = '';
 
-      const startIndex = (page - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const pageProjects = projects.slice(startIndex, endIndex);
+      // Get recent projects from localStorage
+      const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
 
-      pageProjects.forEach(proj => {
+      // Sort projects: first recent projects, then alphabetically
+      projects.sort((a, b) => {
+        const aIsRecent = recentProjects.includes(a.name);
+        const bIsRecent = recentProjects.includes(b.name);
+
+        if (aIsRecent && !bIsRecent) return -1;
+        if (!aIsRecent && bIsRecent) return 1;
+
+        return a.name.localeCompare(b.name);
+      });
+
+      // Render all projects
+      projects.forEach(proj => {
         // Container for each project entry
         const container = document.createElement('div');
         container.classList.add('project-item');
@@ -484,15 +668,21 @@
         // If previously selected, keep it checked
         if (selectedProjects.has(proj.name)) {
           checkbox.checked = true;
+          container.classList.add('selected-project');
         }
 
         // Listen for changes and update the global selection set
         checkbox.addEventListener('change', () => {
           if (checkbox.checked) {
             selectedProjects.add(proj.name);
+            updateRecentProjects(proj.name);
+            container.classList.add('selected-project');
           } else {
             selectedProjects.delete(proj.name);
+            container.classList.remove('selected-project');
           }
+          updateSelectedCount();
+          saveSelectedProjects(); // Save to localStorage whenever selection changes
         });
 
         // Create label, link it to the checkbox via htmlFor
@@ -504,28 +694,12 @@
         container.appendChild(label);
         projectList.appendChild(container);
       });
+
+      // Update the selected count
+      updateSelectedCount();
     }
 
-    function setupProjectPagination(projects, itemsPerPage) {
-      const projectPagination = document.getElementById('projectPagination');
-      projectPagination.innerHTML = '';
-
-      const totalPages = Math.ceil(projects.length / itemsPerPage);
-
-      for (let page = 1; page <= totalPages; page++) {
-        const button = document.createElement('button');
-        button.textContent = page;
-        if (page === currentProjectPage) {
-          button.classList.add('current-page');
-        }
-        button.addEventListener('click', () => {
-          currentProjectPage = page;
-          renderProjectPage(projects, currentProjectPage, itemsPerPage);
-          setupProjectPagination(projects, itemsPerPage);
-        });
-        projectPagination.appendChild(button);
-      }
-    }
+    // Removed the setupProjectPagination function as it's no longer needed with the new UI
 
     /********************************************
      * AUTO-REFRESH FUNCTIONS
@@ -830,10 +1004,93 @@
       if (hideDraftPRsValue !== null) {
         document.getElementById('hideDraftPRs').checked = hideDraftPRsValue === 'true';
       }
+
+      // Load selected projects
+      const savedProjectsString = localStorage.getItem('selectedProjects');
+      if (savedProjectsString) {
+        const savedProjects = JSON.parse(savedProjectsString);
+        // We'll populate the selectedProjects set when projects are loaded
+        savedProjects.forEach(project => selectedProjects.add(project));
+      }
+    }
+
+    // Save selected projects to localStorage
+    function saveSelectedProjects() {
+      localStorage.setItem('selectedProjects', JSON.stringify(Array.from(selectedProjects)));
     }
 
     // Load preferences on page load
     document.addEventListener('DOMContentLoaded', loadUserPreferences);
+
+    /********************************************
+     * PROJECT SEARCH & SELECTION FUNCTIONS
+     ********************************************/
+    // Filter projects based on search term
+    function filterProjects(searchTerm) {
+      searchTerm = searchTerm.toLowerCase();
+      const projectItems = document.querySelectorAll('.project-item');
+
+      let visibleCount = 0;
+      projectItems.forEach(item => {
+        const projectName = item.querySelector('label').textContent.toLowerCase();
+        if (projectName.includes(searchTerm)) {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      return visibleCount;
+    }
+
+    // Clear the project search field
+    function clearProjectSearch() {
+      document.getElementById('projectSearch').value = '';
+      filterProjects('');
+    }
+
+    // Select all visible projects
+    function selectAllVisibleProjects() {
+      const visibleProjects = document.querySelectorAll('.project-item:not([style*="display: none"]) input[type="checkbox"]');
+      visibleProjects.forEach(checkbox => {
+        checkbox.checked = true;
+        selectedProjects.add(checkbox.value);
+        checkbox.closest('.project-item').classList.add('selected-project');
+      });
+      updateSelectedCount();
+      saveSelectedProjects(); // Save to localStorage whenever selection changes
+    }
+
+    // Deselect all projects
+    function deselectAllProjects() {
+      document.querySelectorAll('.project-item input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.project-item').classList.remove('selected-project');
+      });
+      selectedProjects.clear();
+      updateSelectedCount();
+      saveSelectedProjects(); // Save to localStorage whenever selection changes
+    }
+
+    // Invert the selection of visible projects
+    function invertSelection() {
+      document.querySelectorAll('.project-item:not([style*="display: none"]) input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = !checkbox.checked;
+        if (checkbox.checked) {
+          selectedProjects.add(checkbox.value);
+        } else {
+          selectedProjects.delete(checkbox.value);
+        }
+      });
+      updateSelectedCount();
+      saveSelectedProjects(); // Save to localStorage whenever selection changes
+    }
+
+    // Update the selected projects count display
+    function updateSelectedCount() {
+      document.getElementById('selectedCount').textContent = `${selectedProjects.size} selected`;
+    }
   </script>
 </body>
 
