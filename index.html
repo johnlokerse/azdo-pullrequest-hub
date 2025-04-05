@@ -345,15 +345,15 @@
     .project-item:last-child {
       border-bottom: none;
     }
-
-    .recent-project {
+    
+    .selected-project {
       background-color: rgba(0, 120, 212, 0.08);
     }
-
-    body.dark-mode .recent-project {
+    
+    body.dark-mode .selected-project {
       background-color: rgba(0, 120, 212, 0.2);
     }
-
+    
     /*******************************************************
      * New Project Grid Styles (deprecated)
      *******************************************************/
@@ -658,11 +658,6 @@
         const container = document.createElement('div');
         container.classList.add('project-item');
 
-        // If it's a recently used project, add the recent-project class
-        if (recentProjects.includes(proj.name)) {
-          container.classList.add('recent-project');
-        }
-
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.name = 'projects';
@@ -673,6 +668,7 @@
         // If previously selected, keep it checked
         if (selectedProjects.has(proj.name)) {
           checkbox.checked = true;
+          container.classList.add('selected-project');
         }
 
         // Listen for changes and update the global selection set
@@ -680,8 +676,10 @@
           if (checkbox.checked) {
             selectedProjects.add(proj.name);
             updateRecentProjects(proj.name);
+            container.classList.add('selected-project');
           } else {
             selectedProjects.delete(proj.name);
+            container.classList.remove('selected-project');
           }
           updateSelectedCount();
           saveSelectedProjects(); // Save to localStorage whenever selection changes
@@ -1058,6 +1056,7 @@
       visibleProjects.forEach(checkbox => {
         checkbox.checked = true;
         selectedProjects.add(checkbox.value);
+        checkbox.closest('.project-item').classList.add('selected-project');
       });
       updateSelectedCount();
       saveSelectedProjects(); // Save to localStorage whenever selection changes
@@ -1067,6 +1066,7 @@
     function deselectAllProjects() {
       document.querySelectorAll('.project-item input[type="checkbox"]').forEach(checkbox => {
         checkbox.checked = false;
+        checkbox.closest('.project-item').classList.remove('selected-project');
       });
       selectedProjects.clear();
       updateSelectedCount();
