@@ -75,6 +75,52 @@
       border-color: rgba(255, 255, 255, 0.5);
     }
 
+    .header-pat-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-pat-input label {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .header-pat-input input {
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      min-width: 200px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .header-pat-input input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .header-pat-input input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .header-connect-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #ff8c00;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .header-connect-btn:hover {
+      background: #e67e00;
+    }
+
     .header-right {
       display: flex;
       align-items: center;
@@ -99,6 +145,29 @@
     body.dark-mode .header-org-input input:focus {
       background: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode .header-pat-input input {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #f3f3f3;
+    }
+
+    body.dark-mode .header-pat-input input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    body.dark-mode .header-pat-input input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode .header-connect-btn {
+      background: #cc7000;
+    }
+
+    body.dark-mode .header-connect-btn:hover {
+      background: #b36300;
     }
 
     h1 {
@@ -552,6 +621,11 @@
         <label for="organization">Organization:</label>
         <input type="text" id="organization" placeholder="Your organization name" required>
       </div>
+      <div class="header-pat-input">
+        <label for="pat">Personal Access Token:</label>
+        <input type="password" id="pat" placeholder="Your PAT" required>
+      </div>
+      <button class="header-connect-btn" onclick="connectAndFetchProjects()">Connect</button>
     </div>
     <div class="header-right">
       <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
@@ -560,14 +634,6 @@
 
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Horizontal input row for PAT -->
-    <div class="horizontal-inputs">
-      <div class="input-group">
-        <label for="pat">Personal Access Token:</label>
-        <input type="password" id="pat" placeholder="Your PAT" required>
-      </div>
-      <button class="btn" onclick="connectAndFetchProjects()">Connect</button>
-    </div>
 
   <!-- Project selection hidden until connected -->
   <div id="projectContainer" class="hidden project-management">
