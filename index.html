@@ -10,11 +10,95 @@
     }
 
     body {
-      margin: 20px;
+      margin: 0;
       font-family: Arial, sans-serif;
       transition: background 0.3s, color 0.3s;
       position: relative;
-      /* so we can position the toggle theme button absolutely */
+    }
+
+    .main-content {
+      margin: 20px;
+    }
+
+    /* Header Bar Styles */
+    .header-bar {
+      background: #0078d4;
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-size: 1.5em;
+      color: inherit;
+    }
+
+    .header-org-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-org-input label {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .header-org-input input {
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      min-width: 200px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .header-org-input input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .header-org-input input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Dark mode header styles */
+    body.dark-mode .header-bar {
+      background: #2b2b2b;
+      color: #f3f3f3;
+    }
+
+    body.dark-mode .header-org-input input {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #f3f3f3;
+    }
+
+    body.dark-mode .header-org-input input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    body.dark-mode .header-org-input input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
     }
 
     h1 {
@@ -31,22 +115,31 @@
       text-decoration: underline;
     }
 
-    /* Theme toggle button in the top-right corner */
+    /* Theme toggle button in the header */
     .toggle-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
       cursor: pointer;
-      background: #0078d4;
+      background: rgba(255, 255, 255, 0.2);
       color: #fff;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      transition: background 0.3s;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      transition: background 0.3s, border-color 0.3s;
+      font-size: 14px;
     }
 
     .toggle-button:hover {
-      background: #005ea1;
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    body.dark-mode .toggle-button {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-mode .toggle-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
     }
 
     /* Empty state message styling */
@@ -451,23 +544,30 @@
 </head>
 
 <body class="light-mode">
-  <h1>Azure DevOps Pull Requests Overview</h1>
-
-  <!-- Theme toggle button in top-right corner -->
-  <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
-
-  <!-- Horizontal input row for Org & PAT -->
-  <div class="horizontal-inputs">
-    <div class="input-group">
-      <label for="organization">Organization:</label>
-      <input type="text" id="organization" placeholder="Your organization name" required>
+  <!-- Header Bar -->
+  <div class="header-bar">
+    <div class="header-left">
+      <h1>Azure DevOps Pull Requests Overview</h1>
+      <div class="header-org-input">
+        <label for="organization">Organization:</label>
+        <input type="text" id="organization" placeholder="Your organization name" required>
+      </div>
     </div>
-    <div class="input-group">
-      <label for="pat">Personal Access Token:</label>
-      <input type="password" id="pat" placeholder="Your PAT" required>
+    <div class="header-right">
+      <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
     </div>
-    <button class="btn" onclick="connectAndFetchProjects()">Connect</button>
   </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Horizontal input row for PAT -->
+    <div class="horizontal-inputs">
+      <div class="input-group">
+        <label for="pat">Personal Access Token:</label>
+        <input type="password" id="pat" placeholder="Your PAT" required>
+      </div>
+      <button class="btn" onclick="connectAndFetchProjects()">Connect</button>
+    </div>
 
   <!-- Project selection hidden until connected -->
   <div id="projectContainer" class="hidden project-management">
@@ -520,6 +620,8 @@
   </div>
 
   <div class="results" id="results"></div>
+
+  </div> <!-- End main-content -->
 
   <script>
     /********************************************
@@ -999,6 +1101,12 @@
 
     // Load user preferences from localStorage
     function loadUserPreferences() {
+      // Load organization name
+      const savedOrganization = localStorage.getItem('organization');
+      if (savedOrganization) {
+        document.getElementById('organization').value = savedOrganization;
+      }
+
       // Load "hide draft PRs" preference
       const hideDraftPRsValue = localStorage.getItem('hideDraftPRs');
       if (hideDraftPRsValue !== null) {
@@ -1019,8 +1127,21 @@
       localStorage.setItem('selectedProjects', JSON.stringify(Array.from(selectedProjects)));
     }
 
+    // Save organization name to localStorage
+    function saveOrganization() {
+      const organization = document.getElementById('organization').value.trim();
+      localStorage.setItem('organization', organization);
+    }
+
     // Load preferences on page load
     document.addEventListener('DOMContentLoaded', loadUserPreferences);
+
+    // Save organization name when it changes
+    document.addEventListener('DOMContentLoaded', function() {
+      const organizationInput = document.getElementById('organization');
+      organizationInput.addEventListener('input', saveOrganization);
+      organizationInput.addEventListener('blur', saveOrganization);
+    });
 
     /********************************************
      * PROJECT SEARCH & SELECTION FUNCTIONS
