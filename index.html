@@ -508,15 +508,15 @@
     .project-item:last-child {
       border-bottom: none;
     }
-    
+
     .selected-project {
       background-color: rgba(0, 120, 212, 0.08);
     }
-    
+
     body.dark-mode .selected-project {
       background-color: rgba(0, 120, 212, 0.2);
     }
-    
+
     /*******************************************************
      * New Project Grid Styles (deprecated)
      *******************************************************/
@@ -752,6 +752,8 @@
     .project-option-name {
       flex: 1;
       font-size: 14px;
+      color: #333;
+      font-weight: 400;
     }
 
     .project-option-recent-badge {
@@ -855,6 +857,7 @@
         opacity: 0;
         transform: scale(0.8);
       }
+
       to {
         opacity: 1;
         transform: scale(1);
@@ -880,6 +883,10 @@
 
     body.dark-mode .project-option {
       border-bottom-color: #3f3f3f;
+      color: #f3f3f3;
+    }
+
+    body.dark-mode .project-option-name {
       color: #f3f3f3;
     }
 
@@ -916,11 +923,11 @@
       .header-left {
         flex-wrap: wrap;
       }
-      
+
       .project-selector-widget {
         min-width: 250px;
       }
-      
+
       .project-selector-trigger {
         min-width: 200px;
       }
@@ -932,29 +939,29 @@
         align-items: stretch;
         gap: 10px;
       }
-      
+
       .header-left {
         flex-direction: column;
         gap: 10px;
       }
-      
+
       .header-left h1 {
         font-size: 1.2em;
       }
-      
+
       .project-selector-widget {
         min-width: auto;
         width: 100%;
       }
-      
+
       .project-selector-trigger {
         min-width: auto;
       }
-      
+
       .selected-projects-pills {
         padding: 8px 10px !important;
       }
-      
+
       .project-pill {
         font-size: 11px;
       }
@@ -976,21 +983,19 @@
         <input type="password" id="pat" placeholder="Your PAT" required>
       </div>
       <button class="header-connect-btn" onclick="connectAndFetchProjects()">Connect</button>
-      
+
       <!-- Smart Project Selection Widget -->
       <div id="projectSelectorWidget" class="project-selector-widget hidden">
         <span class="project-selector-label">Projects:</span>
         <div class="project-selector-container">
-          <div class="project-selector-trigger" onclick="toggleProjectSelector()" 
-               tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false"
-               onkeydown="handleProjectSelectorKeydown(event)">
+          <div class="project-selector-trigger" onclick="toggleProjectSelector()" tabindex="0" role="button"
+            aria-haspopup="listbox" aria-expanded="false" onkeydown="handleProjectSelectorKeydown(event)">
             <span class="project-selector-text" id="projectSelectorText">Select projects...</span>
             <span class="project-selector-arrow" id="projectSelectorArrow">▼</span>
           </div>
           <div class="project-selector-dropdown" id="projectSelectorDropdown" role="listbox">
-            <input type="text" class="project-search-input" id="projectSearchInput" 
-                   placeholder="Search projects..." oninput="filterProjectOptions(this.value)"
-                   onkeydown="handleSearchKeydown(event)">
+            <input type="text" class="project-search-input" id="projectSearchInput" placeholder="Search projects..."
+              oninput="filterProjectOptions(this.value)" onkeydown="handleSearchKeydown(event)">
             <div class="project-options" id="projectOptions"></div>
           </div>
         </div>
@@ -1002,40 +1007,41 @@
   </div>
 
   <!-- Selected Projects Pills (shown below header when projects are selected) -->
-  <div id="selectedProjectsPills" class="selected-projects-pills hidden" style="padding: 8px 20px; background: rgba(0, 120, 212, 0.1);"></div>
+  <div id="selectedProjectsPills" class="selected-projects-pills hidden"
+    style="padding: 8px 20px; background: rgba(0, 120, 212, 0.1);"></div>
 
   <!-- Main Content -->
   <div class="main-content">
 
-  <!-- Button to fetch PRs -->
-  <button id="fetchPrsBtn" class="btn hidden" onclick="fetchPullRequests()">
-    Fetch Pull Requests
-  </button>
+    <!-- Button to fetch PRs -->
+    <button id="fetchPrsBtn" class="btn hidden" onclick="fetchPullRequests()">
+      Fetch Pull Requests
+    </button>
 
-  <!-- Auto-refresh controls -->
-  <div id="autoRefreshControls" class="hidden auto-refresh-controls">
-    <label for="autoRefreshToggle">
-      <input type="checkbox" id="autoRefreshToggle" onclick="toggleAutoRefresh()">
-      Auto-refresh
-    </label>
-    <select id="refreshInterval" onchange="updateRefreshInterval()">
-      <option value="60000">Every 1 minute</option>
-      <option value="300000" selected>Every 5 minutes</option>
-      <option value="600000">Every 10 minutes</option>
-      <option value="1800000">Every 30 minutes</option>
-    </select>
-    <span id="lastRefreshed" class="last-refreshed hidden">Last refreshed: Never</span>
-    <span id="countdownTimer" class="countdown hidden">Next refresh in: 5:00</span>
-
-    <div class="filter-controls">
-      <label for="hideDraftPRs">
-        <input type="checkbox" id="hideDraftPRs" checked onchange="hideDraftPRsChanged()">
-        Hide draft PRs
+    <!-- Auto-refresh controls -->
+    <div id="autoRefreshControls" class="hidden auto-refresh-controls">
+      <label for="autoRefreshToggle">
+        <input type="checkbox" id="autoRefreshToggle" onclick="toggleAutoRefresh()">
+        Auto-refresh
       </label>
-    </div>
-  </div>
+      <select id="refreshInterval" onchange="updateRefreshInterval()">
+        <option value="60000">Every 1 minute</option>
+        <option value="300000" selected>Every 5 minutes</option>
+        <option value="600000">Every 10 minutes</option>
+        <option value="1800000">Every 30 minutes</option>
+      </select>
+      <span id="lastRefreshed" class="last-refreshed hidden">Last refreshed: Never</span>
+      <span id="countdownTimer" class="countdown hidden">Next refresh in: 5:00</span>
 
-  <div class="results" id="results"></div>
+      <div class="filter-controls">
+        <label for="hideDraftPRs">
+          <input type="checkbox" id="hideDraftPRs" checked onchange="hideDraftPRsChanged()">
+          Hide draft PRs
+        </label>
+      </div>
+    </div>
+
+    <div class="results" id="results"></div>
 
   </div> <!-- End main-content -->
 
@@ -1076,9 +1082,9 @@
       const dropdown = document.getElementById('projectSelectorDropdown');
       const arrow = document.getElementById('projectSelectorArrow');
       const trigger = document.querySelector('.project-selector-trigger');
-      
+
       projectSelectorOpen = !projectSelectorOpen;
-      
+
       if (projectSelectorOpen) {
         dropdown.classList.add('open');
         arrow.classList.add('open');
@@ -1092,7 +1098,7 @@
         trigger.classList.remove('active');
         document.removeEventListener('click', handleClickOutside);
       }
-      
+
       updateAriaAttributes();
       updateAriaAttributes();
     }
@@ -1111,7 +1117,7 @@
         const dropdown = document.getElementById('projectSelectorDropdown');
         const arrow = document.getElementById('projectSelectorArrow');
         const trigger = document.querySelector('.project-selector-trigger');
-        
+
         dropdown.classList.remove('open');
         arrow.classList.remove('open');
         trigger.classList.remove('active');
@@ -1126,7 +1132,7 @@
     function filterProjectOptions(searchTerm) {
       searchTerm = searchTerm.toLowerCase();
       const options = document.querySelectorAll('.project-option');
-      
+
       let visibleCount = 0;
       options.forEach(option => {
         const projectName = option.querySelector('.project-option-name').textContent.toLowerCase();
@@ -1137,7 +1143,7 @@
           option.style.display = 'none';
         }
       });
-      
+
       return visibleCount;
     }
 
@@ -1149,7 +1155,7 @@
       } else {
         selectedProjects.delete(projectName);
       }
-      
+
       updateProjectSelectorDisplay();
       updateSelectedProjectsPills();
       saveSelectedProjects();
@@ -1158,13 +1164,13 @@
     // Remove project from selection (used by pill remove buttons)
     function removeProjectSelection(projectName) {
       selectedProjects.delete(projectName);
-      
+
       // Update the checkbox in the dropdown
       const checkbox = document.querySelector(`input[value="${projectName}"]`);
       if (checkbox) {
         checkbox.checked = false;
       }
-      
+
       updateProjectSelectorDisplay();
       updateSelectedProjectsPills();
       saveSelectedProjects();
@@ -1174,7 +1180,7 @@
     function updateProjectSelectorDisplay() {
       const text = document.getElementById('projectSelectorText');
       const count = selectedProjects.size;
-      
+
       if (count === 0) {
         text.textContent = 'Select projects...';
       } else if (count === 1) {
@@ -1187,15 +1193,33 @@
     // Update the selected projects pills display
     function updateSelectedProjectsPills() {
       const pillsContainer = document.getElementById('selectedProjectsPills');
+      const fetchPrsBtn = document.getElementById('fetchPrsBtn');
+      const autoRefreshControls = document.getElementById('autoRefreshControls');
       const projects = Array.from(selectedProjects);
-      
+
       if (projects.length === 0) {
+        // Hide pills container
         pillsContainer.classList.add('hidden');
         pillsContainer.innerHTML = '';
+        
+        // Hide fetch button and auto-refresh controls when no projects are selected
+        fetchPrsBtn.classList.add('hidden');
+        autoRefreshControls.classList.add('hidden');
+        
+        // Clear any existing pull requests display
+        const resultsDiv = document.getElementById('results');
+        if (resultsDiv && resultsDiv.innerHTML.includes('pull request')) {
+          resultsDiv.innerHTML = '<p>Select projects using the dropdown above to monitor their pull requests.</p>';
+        }
+        
         return;
       }
-      
+
+      // Show elements when projects are selected
       pillsContainer.classList.remove('hidden');
+      fetchPrsBtn.classList.remove('hidden');
+      autoRefreshControls.classList.remove('hidden');
+      
       pillsContainer.innerHTML = projects.map(project => `
         <div class="project-pill">
           ${project}
@@ -1207,16 +1231,16 @@
     // Update recent projects list
     function updateRecentProjects(projectName) {
       let recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-      
+
       // Remove if already exists
       recentProjects = recentProjects.filter(p => p !== projectName);
-      
+
       // Add to beginning
       recentProjects.unshift(projectName);
-      
+
       // Keep only last 5
       recentProjects = recentProjects.slice(0, 5);
-      
+
       localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
     }
 
@@ -1224,27 +1248,27 @@
     function renderProjectOptions(projects) {
       const container = document.getElementById('projectOptions');
       const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-      
+
       // Sort projects: recent first, then alphabetically
       const sortedProjects = projects.slice().sort((a, b) => {
         const aIsRecent = recentProjects.includes(a.name);
         const bIsRecent = recentProjects.includes(b.name);
-        
+
         if (aIsRecent && !bIsRecent) return -1;
         if (!aIsRecent && bIsRecent) return 1;
-        
+
         return a.name.localeCompare(b.name);
       });
-      
+
       container.innerHTML = sortedProjects.map(project => {
         const isRecent = recentProjects.includes(project.name);
         const isSelected = selectedProjects.has(project.name);
-        
+
         return `
           <div class="project-option ${isSelected ? 'selected' : ''} ${isRecent ? 'recent' : ''}">
-            <input type="checkbox" 
-                   class="project-option-checkbox" 
-                   value="${project.name}" 
+            <input type="checkbox"
+                   class="project-option-checkbox"
+                   value="${project.name}"
                    ${isSelected ? 'checked' : ''}
                    onchange="toggleProjectSelection('${project.name}', this)">
             <span class="project-option-name">${project.name}</span>
@@ -1252,7 +1276,7 @@
           </div>
         `;
       }).join('');
-      
+
       // Add quick action buttons at the top of the dropdown
       if (sortedProjects.length > 0) {
         const quickActions = document.createElement('div');
@@ -1307,13 +1331,13 @@
         selectedProjects.add(project.name);
         updateRecentProjects(project.name);
       });
-      
+
       // Update all checkboxes
       document.querySelectorAll('.project-option-checkbox').forEach(checkbox => {
         checkbox.checked = true;
         checkbox.closest('.project-option').classList.add('selected');
       });
-      
+
       updateProjectSelectorDisplay();
       updateSelectedProjectsPills();
       saveSelectedProjects();
@@ -1321,13 +1345,13 @@
 
     function clearAllProjects() {
       selectedProjects.clear();
-      
+
       // Update all checkboxes
       document.querySelectorAll('.project-option-checkbox').forEach(checkbox => {
         checkbox.checked = false;
         checkbox.closest('.project-option').classList.remove('selected');
       });
-      
+
       updateProjectSelectorDisplay();
       updateSelectedProjectsPills();
       saveSelectedProjects();
@@ -1336,11 +1360,11 @@
     // Quick select recent projects
     function selectRecentProjects() {
       const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-      
+
       recentProjects.forEach(projectName => {
         if (allProjects.some(p => p.name === projectName)) {
           selectedProjects.add(projectName);
-          
+
           // Update checkbox if visible
           const checkbox = document.querySelector(`input[value="${projectName}"]`);
           if (checkbox) {
@@ -1349,7 +1373,7 @@
           }
         }
       });
-      
+
       updateProjectSelectorDisplay();
       updateSelectedProjectsPills();
       saveSelectedProjects();
@@ -1420,7 +1444,7 @@
 
           // Render project options in the dropdown
           renderProjectOptions(allProjects);
-          
+
           // Update display
           updateProjectSelectorDisplay();
           updateSelectedProjectsPills();
@@ -1784,11 +1808,28 @@
     document.addEventListener('DOMContentLoaded', loadUserPreferences);
 
     // Save organization name when it changes
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const organizationInput = document.getElementById('organization');
       organizationInput.addEventListener('input', saveOrganization);
       organizationInput.addEventListener('blur', saveOrganization);
+      
+      // Initialize UI state - ensure proper elements are hidden on load
+      initializeUIState();
     });
+
+    // Initialize UI state on page load
+    function initializeUIState() {
+      // Ensure UI elements are hidden when no projects are selected
+      if (selectedProjects.size === 0) {
+        const fetchPrsBtn = document.getElementById('fetchPrsBtn');
+        const autoRefreshControls = document.getElementById('autoRefreshControls');
+        const selectedProjectsPills = document.getElementById('selectedProjectsPills');
+        
+        fetchPrsBtn.classList.add('hidden');
+        autoRefreshControls.classList.add('hidden');
+        selectedProjectsPills.classList.add('hidden');
+      }
+    }
   </script>
 </body>
 
