@@ -754,6 +754,8 @@
       font-size: 14px;
       color: #333;
       font-weight: 400;
+      cursor: pointer;
+      user-select: none;
     }
 
     .project-option-recent-badge {
@@ -1008,7 +1010,7 @@
 
   <!-- Selected Projects Pills (shown below header when projects are selected) -->
   <div id="selectedProjectsPills" class="selected-projects-pills hidden"
-    style="padding: 8px 20px; background: rgba(0, 120, 212, 0.1);"></div>
+    style="padding: 8px 20px; background: rgba(0, 120, 212, 0.7);"></div>
 
   <!-- Main Content -->
   <div class="main-content">
@@ -1161,6 +1163,17 @@
       saveSelectedProjects();
     }
 
+    // Toggle project selection when clicking on the option text/div (not checkbox)
+    function toggleProjectSelectionFromOption(projectName) {
+      const checkbox = document.querySelector(`input[value="${projectName}"]`);
+      if (checkbox) {
+        // Toggle the checkbox state
+        checkbox.checked = !checkbox.checked;
+        // Call the original toggle function
+        toggleProjectSelection(projectName, checkbox);
+      }
+    }
+
     // Remove project from selection (used by pill remove buttons)
     function removeProjectSelection(projectName) {
       selectedProjects.delete(projectName);
@@ -1201,17 +1214,17 @@
         // Hide pills container
         pillsContainer.classList.add('hidden');
         pillsContainer.innerHTML = '';
-        
+
         // Hide fetch button and auto-refresh controls when no projects are selected
         fetchPrsBtn.classList.add('hidden');
         autoRefreshControls.classList.add('hidden');
-        
+
         // Clear any existing pull requests display
         const resultsDiv = document.getElementById('results');
         if (resultsDiv && resultsDiv.innerHTML.includes('pull request')) {
           resultsDiv.innerHTML = '<p>Select projects using the dropdown above to monitor their pull requests.</p>';
         }
-        
+
         return;
       }
 
@@ -1219,7 +1232,7 @@
       pillsContainer.classList.remove('hidden');
       fetchPrsBtn.classList.remove('hidden');
       autoRefreshControls.classList.remove('hidden');
-      
+
       pillsContainer.innerHTML = projects.map(project => `
         <div class="project-pill">
           ${project}
@@ -1265,12 +1278,14 @@
         const isSelected = selectedProjects.has(project.name);
 
         return `
-          <div class="project-option ${isSelected ? 'selected' : ''} ${isRecent ? 'recent' : ''}">
+          <div class="project-option ${isSelected ? 'selected' : ''} ${isRecent ? 'recent' : ''}"
+               onclick="toggleProjectSelectionFromOption('${project.name}')">
             <input type="checkbox"
                    class="project-option-checkbox"
                    value="${project.name}"
                    ${isSelected ? 'checked' : ''}
-                   onchange="toggleProjectSelection('${project.name}', this)">
+                   onchange="toggleProjectSelection('${project.name}', this)"
+                   onclick="event.stopPropagation()">
             <span class="project-option-name">${project.name}</span>
             ${isRecent ? '<span class="project-option-recent-badge">Recent</span>' : ''}
           </div>
@@ -1812,7 +1827,7 @@
       const organizationInput = document.getElementById('organization');
       organizationInput.addEventListener('input', saveOrganization);
       organizationInput.addEventListener('blur', saveOrganization);
-      
+
       // Initialize UI state - ensure proper elements are hidden on load
       initializeUIState();
     });
@@ -1824,7 +1839,7 @@
         const fetchPrsBtn = document.getElementById('fetchPrsBtn');
         const autoRefreshControls = document.getElementById('autoRefreshControls');
         const selectedProjectsPills = document.getElementById('selectedProjectsPills');
-        
+
         fetchPrsBtn.classList.add('hidden');
         autoRefreshControls.classList.add('hidden');
         selectedProjectsPills.classList.add('hidden');
