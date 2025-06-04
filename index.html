@@ -1074,7 +1074,7 @@
   </div>
 
   <!-- Main Content -->
-  <div class="main-content">
+  <div class="main-content hidden">
 
     <!-- Button to fetch PRs -->
     <button id="fetchPrsBtn" class="btn hidden" onclick="fetchPullRequests()">
@@ -1272,8 +1272,9 @@
       const projects = Array.from(selectedProjects);
 
       if (projects.length === 0) {
-        // Hide pills container
+        // Hide pills container - use inline style to override existing inline styles
         pillsContainer.classList.add('hidden');
+        pillsContainer.style.display = 'none';
         pillsContainer.innerHTML = '';
         
         // Hide main content elements when no projects are selected
@@ -1289,6 +1290,7 @@
 
       // Show elements when projects are selected
       pillsContainer.classList.remove('hidden');
+      pillsContainer.style.display = 'block'; // Override the display none when showing
       fetchPrsBtn.classList.remove('hidden');
       autoRefreshControls.classList.remove('hidden');
       mainContent.classList.remove('hidden');
@@ -1895,20 +1897,9 @@
       initializeUIState();
     });    // Initialize UI state on page load
     function initializeUIState() {
-      // Ensure UI elements are hidden when no projects are selected
+      // Elements start hidden by default in HTML, just ensure no projects message is shown
       if (selectedProjects.size === 0) {
-        const fetchPrsBtn = document.getElementById('fetchPrsBtn');
-        const autoRefreshControls = document.getElementById('autoRefreshControls');
-        const selectedProjectsPills = document.getElementById('selectedProjectsPills');
         const noProjectsMessage = document.getElementById('noProjectsMessage');
-        const mainContent = document.querySelector('.main-content');
-
-        fetchPrsBtn.classList.add('hidden');
-        autoRefreshControls.classList.add('hidden');
-        selectedProjectsPills.classList.add('hidden');
-        mainContent.classList.add('hidden');
-        
-        // Show the no projects message
         noProjectsMessage.classList.remove('hidden');
       }
     }
