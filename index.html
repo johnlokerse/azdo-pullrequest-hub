@@ -866,6 +866,58 @@
       }
     }
 
+    /* No Projects Message */
+    .no-projects-message {
+      margin: 40px 20px;
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: all 0.3s ease;
+    }
+
+    .no-projects-message.hidden {
+      display: none;
+    }
+
+    .message-content h2 {
+      color: #495057;
+      margin: 0 0 16px 0;
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+
+    .message-content p {
+      color: #6c757d;
+      margin: 0 0 20px 0;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .message-icon {
+      font-size: 48px;
+      margin-top: 10px;
+      opacity: 0.6;
+    }
+
+    /* Dark mode styles for no projects message */
+    body.dark-mode .no-projects-message {
+      background: #2b2b2b;
+      border-color: #495057;
+    }
+
+    body.dark-mode .message-content h2 {
+      color: #f8f9fa;
+    }
+
+    body.dark-mode .message-content p {
+      color: #adb5bd;
+    }
+
     /* Dark mode styles for project selector */
     body.dark-mode .project-selector-dropdown {
       background: #2b2b2b;
@@ -1011,6 +1063,15 @@
   <!-- Selected Projects Pills (shown below header when projects are selected) -->
   <div id="selectedProjectsPills" class="selected-projects-pills hidden"
     style="padding: 8px 20px; background: rgba(0, 120, 212, 0.7);"></div>
+
+  <!-- No Projects Selected Message -->
+  <div id="noProjectsMessage" class="no-projects-message">
+    <div class="message-content">
+      <h2>Welcome to Azure DevOps Pull Request Hub</h2>
+      <p>Select your project(s) using the project dropdown in the top right to get started monitoring pull requests.</p>
+      <div class="message-icon">📋</div>
+    </div>
+  </div>
 
   <!-- Main Content -->
   <div class="main-content">
@@ -1201,30 +1262,28 @@
       } else {
         text.textContent = `${count} projects selected`;
       }
-    }
-
-    // Update the selected projects pills display
+    }    // Update the selected projects pills display
     function updateSelectedProjectsPills() {
       const pillsContainer = document.getElementById('selectedProjectsPills');
       const fetchPrsBtn = document.getElementById('fetchPrsBtn');
       const autoRefreshControls = document.getElementById('autoRefreshControls');
+      const noProjectsMessage = document.getElementById('noProjectsMessage');
+      const mainContent = document.querySelector('.main-content');
       const projects = Array.from(selectedProjects);
 
       if (projects.length === 0) {
         // Hide pills container
         pillsContainer.classList.add('hidden');
         pillsContainer.innerHTML = '';
-
-        // Hide fetch button and auto-refresh controls when no projects are selected
+        
+        // Hide main content elements when no projects are selected
         fetchPrsBtn.classList.add('hidden');
         autoRefreshControls.classList.add('hidden');
-
-        // Clear any existing pull requests display
-        const resultsDiv = document.getElementById('results');
-        if (resultsDiv && resultsDiv.innerHTML.includes('pull request')) {
-          resultsDiv.innerHTML = '<p>Select projects using the dropdown above to monitor their pull requests.</p>';
-        }
-
+        mainContent.classList.add('hidden');
+        
+        // Show the no projects message
+        noProjectsMessage.classList.remove('hidden');
+        
         return;
       }
 
@@ -1232,7 +1291,11 @@
       pillsContainer.classList.remove('hidden');
       fetchPrsBtn.classList.remove('hidden');
       autoRefreshControls.classList.remove('hidden');
-
+      mainContent.classList.remove('hidden');
+      
+      // Hide the no projects message
+      noProjectsMessage.classList.add('hidden');
+      
       pillsContainer.innerHTML = projects.map(project => `
         <div class="project-pill">
           ${project}
@@ -1830,19 +1893,23 @@
 
       // Initialize UI state - ensure proper elements are hidden on load
       initializeUIState();
-    });
-
-    // Initialize UI state on page load
+    });    // Initialize UI state on page load
     function initializeUIState() {
       // Ensure UI elements are hidden when no projects are selected
       if (selectedProjects.size === 0) {
         const fetchPrsBtn = document.getElementById('fetchPrsBtn');
         const autoRefreshControls = document.getElementById('autoRefreshControls');
         const selectedProjectsPills = document.getElementById('selectedProjectsPills');
+        const noProjectsMessage = document.getElementById('noProjectsMessage');
+        const mainContent = document.querySelector('.main-content');
 
         fetchPrsBtn.classList.add('hidden');
         autoRefreshControls.classList.add('hidden');
         selectedProjectsPills.classList.add('hidden');
+        mainContent.classList.add('hidden');
+        
+        // Show the no projects message
+        noProjectsMessage.classList.remove('hidden');
       }
     }
   </script>
