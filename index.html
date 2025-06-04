@@ -30,18 +30,22 @@
       align-items: center;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       transition: background 0.3s, color 0.3s;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
     .header-left {
       display: flex;
       align-items: center;
       gap: 15px;
+      flex-wrap: wrap;
     }
 
     .header-left h1 {
       margin: 0;
       font-size: 1.5em;
       color: inherit;
+      white-space: nowrap;
     }
 
     .header-org-input {
@@ -380,10 +384,7 @@
      * Project Grid Styles
      *******************************************************/
     .project-management {
-      background: #f5f5f5;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      width: 100%;
+      display: none !important;
     }
 
     body.dark-mode .project-management {
@@ -609,6 +610,355 @@
       background-color: #0078d4;
       color: #fff;
     }
+
+    /* Smart Project Selection Widget */
+    .project-selector-widget {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 300px;
+    }
+
+    .project-selector-label {
+      font-weight: 500;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .project-selector-container {
+      position: relative;
+      flex: 1;
+    }
+
+    .project-selector-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 250px;
+      font-size: 14px;
+    }
+
+    .project-selector-trigger:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .project-selector-trigger.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .project-selector-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .project-selector-arrow {
+      margin-left: 8px;
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .project-selector-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .project-selector-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 4px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .project-selector-dropdown.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .project-search-input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      outline: none;
+      background: #f9f9f9;
+    }
+
+    .project-search-input::placeholder {
+      color: #999;
+    }
+
+    .project-options {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .project-option {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .project-option:hover {
+      background: #f8f9fa;
+    }
+
+    .project-option.selected {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .project-option.recent {
+      background: linear-gradient(90deg, #fff3e0 0%, #fff 30%);
+      border-left: 3px solid #ff9800;
+    }
+
+    .project-option.recent.selected {
+      background: linear-gradient(90deg, #e1f5fe 0%, #e3f2fd 30%);
+      border-left-color: #1976d2;
+    }
+
+    .project-option-checkbox {
+      margin-right: 10px;
+    }
+
+    .project-option-name {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .project-option-recent-badge {
+      font-size: 10px;
+      background: #ff9800;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+
+    /* Quick Actions in Project Dropdown */
+    .project-quick-actions {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      background: #f8f9fa;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .quick-actions-header {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      margin-right: 8px;
+    }
+
+    .quick-action-btn {
+      background: #0078d4;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .quick-action-btn:hover {
+      background: #005ea1;
+    }
+
+    body.dark-mode .project-quick-actions {
+      background: #1e1e1e;
+      border-bottom-color: #3f3f3f;
+    }
+
+    body.dark-mode .quick-actions-header {
+      color: #ccc;
+    }
+
+    /* Selected Projects Pills */
+    .selected-projects-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      max-width: 100%;
+    }
+
+    .project-pill {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      animation: slideIn 0.3s ease;
+    }
+
+    .project-pill-remove {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.8);
+      margin-left: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .project-pill-remove:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Dark mode styles for project selector */
+    body.dark-mode .project-selector-dropdown {
+      background: #2b2b2b;
+      border-color: #3f3f3f;
+      color: #f3f3f3;
+    }
+
+    body.dark-mode .project-search-input {
+      background: #1e1e1e;
+      color: #f3f3f3;
+      border-bottom-color: #3f3f3f;
+    }
+
+    body.dark-mode .project-search-input::placeholder {
+      color: #888;
+    }
+
+    body.dark-mode .project-option {
+      border-bottom-color: #3f3f3f;
+      color: #f3f3f3;
+    }
+
+    body.dark-mode .project-option:hover {
+      background: #3f3f3f;
+    }
+
+    body.dark-mode .project-option.selected {
+      background: #1e3a5f;
+      color: #79bdfd;
+    }
+
+    body.dark-mode .project-option.recent {
+      background: linear-gradient(90deg, #2d1b00 0%, #2b2b2b 30%);
+      border-left-color: #cc7000;
+    }
+
+    body.dark-mode .project-option.recent.selected {
+      background: linear-gradient(90deg, #1e3a5f 0%, #1e3a5f 30%);
+      border-left-color: #79bdfd;
+    }
+
+    body.dark-mode .project-option-recent-badge {
+      background: #cc7000;
+    }
+
+    /* Dark mode styles for selected projects pills container */
+    body.dark-mode #selectedProjectsPills {
+      background: rgba(43, 43, 43, 0.8) !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .header-left {
+        flex-wrap: wrap;
+      }
+      
+      .project-selector-widget {
+        min-width: 250px;
+      }
+      
+      .project-selector-trigger {
+        min-width: 200px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      
+      .header-left {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .header-left h1 {
+        font-size: 1.2em;
+      }
+      
+      .project-selector-widget {
+        min-width: auto;
+        width: 100%;
+      }
+      
+      .project-selector-trigger {
+        min-width: auto;
+      }
+      
+      .selected-projects-pills {
+        padding: 8px 10px !important;
+      }
+      
+      .project-pill {
+        font-size: 11px;
+      }
+    }
   </style>
 </head>
 
@@ -616,7 +966,7 @@
   <!-- Header Bar -->
   <div class="header-bar">
     <div class="header-left">
-      <h1>Azure DevOps Pull Requests Overview</h1>
+      <h1>Azure DevOps Pull Requests</h1>
       <div class="header-org-input">
         <label for="organization">Organization:</label>
         <input type="text" id="organization" placeholder="Your organization name" required>
@@ -626,36 +976,36 @@
         <input type="password" id="pat" placeholder="Your PAT" required>
       </div>
       <button class="header-connect-btn" onclick="connectAndFetchProjects()">Connect</button>
+      
+      <!-- Smart Project Selection Widget -->
+      <div id="projectSelectorWidget" class="project-selector-widget hidden">
+        <span class="project-selector-label">Projects:</span>
+        <div class="project-selector-container">
+          <div class="project-selector-trigger" onclick="toggleProjectSelector()" 
+               tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false"
+               onkeydown="handleProjectSelectorKeydown(event)">
+            <span class="project-selector-text" id="projectSelectorText">Select projects...</span>
+            <span class="project-selector-arrow" id="projectSelectorArrow">▼</span>
+          </div>
+          <div class="project-selector-dropdown" id="projectSelectorDropdown" role="listbox">
+            <input type="text" class="project-search-input" id="projectSearchInput" 
+                   placeholder="Search projects..." oninput="filterProjectOptions(this.value)"
+                   onkeydown="handleSearchKeydown(event)">
+            <div class="project-options" id="projectOptions"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="header-right">
       <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
     </div>
   </div>
 
+  <!-- Selected Projects Pills (shown below header when projects are selected) -->
+  <div id="selectedProjectsPills" class="selected-projects-pills hidden" style="padding: 8px 20px; background: rgba(0, 120, 212, 0.1);"></div>
+
   <!-- Main Content -->
   <div class="main-content">
-
-  <!-- Project selection hidden until connected -->
-  <div id="projectContainer" class="hidden project-management">
-    <h2>Select Projects</h2>
-
-    <div class="project-search">
-      <input type="text" id="projectSearch" placeholder="Search projects..." oninput="filterProjects(this.value)">
-      <button class="clear-btn" onclick="clearProjectSearch()">✕</button>
-    </div>
-
-    <div class="project-selection-actions">
-      <div class="action-buttons">
-        <button class="btn" onclick="selectAllVisibleProjects()">Select All</button>
-        <button class="btn" onclick="deselectAllProjects()">Clear All</button>
-      </div>
-      <div id="selectedCount">0 selected</div>
-    </div>
-
-    <div class="project-container">
-      <div id="projectList" class="project-list"></div>
-    </div>
-  </div>
 
   <!-- Button to fetch PRs -->
   <button id="fetchPrsBtn" class="btn hidden" onclick="fetchPullRequests()">
@@ -706,12 +1056,304 @@
 
     let authHeader = '';
     let allProjects = [];
-    let currentProjectPage = 1;
-    const itemsPerProjectPage = 10; // We'll show 10 projects per page
+    let projectSelectorOpen = false;
 
-    // We'll track which projects are "selected" across pages.
+    // We'll track which projects are "selected" in a Set.
     // We'll store them by project name in a Set.
     const selectedProjects = new Set();
+
+    // Auto-refresh variables
+    let autoRefreshEnabled = false;
+    let refreshTimer = null;
+    let lastRefreshTime = null;
+
+    /********************************************
+     * SMART PROJECT SELECTOR FUNCTIONS
+     ********************************************/
+
+    // Toggle the project selector dropdown
+    function toggleProjectSelector() {
+      const dropdown = document.getElementById('projectSelectorDropdown');
+      const arrow = document.getElementById('projectSelectorArrow');
+      const trigger = document.querySelector('.project-selector-trigger');
+      
+      projectSelectorOpen = !projectSelectorOpen;
+      
+      if (projectSelectorOpen) {
+        dropdown.classList.add('open');
+        arrow.classList.add('open');
+        trigger.classList.add('active');
+        document.getElementById('projectSearchInput').focus();
+        // Add click outside listener
+        setTimeout(() => document.addEventListener('click', handleClickOutside), 0);
+      } else {
+        dropdown.classList.remove('open');
+        arrow.classList.remove('open');
+        trigger.classList.remove('active');
+        document.removeEventListener('click', handleClickOutside);
+      }
+      
+      updateAriaAttributes();
+      updateAriaAttributes();
+    }
+
+    // Handle clicks outside the dropdown to close it
+    function handleClickOutside(event) {
+      const widget = document.getElementById('projectSelectorWidget');
+      if (!widget.contains(event.target)) {
+        closeProjectSelector();
+      }
+    }
+
+    // Close the project selector
+    function closeProjectSelector() {
+      if (projectSelectorOpen) {
+        const dropdown = document.getElementById('projectSelectorDropdown');
+        const arrow = document.getElementById('projectSelectorArrow');
+        const trigger = document.querySelector('.project-selector-trigger');
+        
+        dropdown.classList.remove('open');
+        arrow.classList.remove('open');
+        trigger.classList.remove('active');
+        projectSelectorOpen = false;
+        document.removeEventListener('click', handleClickOutside);
+        updateAriaAttributes();
+        updateAriaAttributes();
+      }
+    }
+
+    // Filter project options in the dropdown
+    function filterProjectOptions(searchTerm) {
+      searchTerm = searchTerm.toLowerCase();
+      const options = document.querySelectorAll('.project-option');
+      
+      let visibleCount = 0;
+      options.forEach(option => {
+        const projectName = option.querySelector('.project-option-name').textContent.toLowerCase();
+        if (projectName.includes(searchTerm)) {
+          option.style.display = '';
+          visibleCount++;
+        } else {
+          option.style.display = 'none';
+        }
+      });
+      
+      return visibleCount;
+    }
+
+    // Toggle project selection
+    function toggleProjectSelection(projectName, checkbox) {
+      if (checkbox.checked) {
+        selectedProjects.add(projectName);
+        updateRecentProjects(projectName);
+      } else {
+        selectedProjects.delete(projectName);
+      }
+      
+      updateProjectSelectorDisplay();
+      updateSelectedProjectsPills();
+      saveSelectedProjects();
+    }
+
+    // Remove project from selection (used by pill remove buttons)
+    function removeProjectSelection(projectName) {
+      selectedProjects.delete(projectName);
+      
+      // Update the checkbox in the dropdown
+      const checkbox = document.querySelector(`input[value="${projectName}"]`);
+      if (checkbox) {
+        checkbox.checked = false;
+      }
+      
+      updateProjectSelectorDisplay();
+      updateSelectedProjectsPills();
+      saveSelectedProjects();
+    }
+
+    // Update the project selector trigger text
+    function updateProjectSelectorDisplay() {
+      const text = document.getElementById('projectSelectorText');
+      const count = selectedProjects.size;
+      
+      if (count === 0) {
+        text.textContent = 'Select projects...';
+      } else if (count === 1) {
+        text.textContent = Array.from(selectedProjects)[0];
+      } else {
+        text.textContent = `${count} projects selected`;
+      }
+    }
+
+    // Update the selected projects pills display
+    function updateSelectedProjectsPills() {
+      const pillsContainer = document.getElementById('selectedProjectsPills');
+      const projects = Array.from(selectedProjects);
+      
+      if (projects.length === 0) {
+        pillsContainer.classList.add('hidden');
+        pillsContainer.innerHTML = '';
+        return;
+      }
+      
+      pillsContainer.classList.remove('hidden');
+      pillsContainer.innerHTML = projects.map(project => `
+        <div class="project-pill">
+          ${project}
+          <button class="project-pill-remove" onclick="removeProjectSelection('${project}')" title="Remove ${project}">×</button>
+        </div>
+      `).join('');
+    }
+
+    // Update recent projects list
+    function updateRecentProjects(projectName) {
+      let recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
+      
+      // Remove if already exists
+      recentProjects = recentProjects.filter(p => p !== projectName);
+      
+      // Add to beginning
+      recentProjects.unshift(projectName);
+      
+      // Keep only last 5
+      recentProjects = recentProjects.slice(0, 5);
+      
+      localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
+    }
+
+    // Render project options in the dropdown
+    function renderProjectOptions(projects) {
+      const container = document.getElementById('projectOptions');
+      const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
+      
+      // Sort projects: recent first, then alphabetically
+      const sortedProjects = projects.slice().sort((a, b) => {
+        const aIsRecent = recentProjects.includes(a.name);
+        const bIsRecent = recentProjects.includes(b.name);
+        
+        if (aIsRecent && !bIsRecent) return -1;
+        if (!aIsRecent && bIsRecent) return 1;
+        
+        return a.name.localeCompare(b.name);
+      });
+      
+      container.innerHTML = sortedProjects.map(project => {
+        const isRecent = recentProjects.includes(project.name);
+        const isSelected = selectedProjects.has(project.name);
+        
+        return `
+          <div class="project-option ${isSelected ? 'selected' : ''} ${isRecent ? 'recent' : ''}">
+            <input type="checkbox" 
+                   class="project-option-checkbox" 
+                   value="${project.name}" 
+                   ${isSelected ? 'checked' : ''}
+                   onchange="toggleProjectSelection('${project.name}', this)">
+            <span class="project-option-name">${project.name}</span>
+            ${isRecent ? '<span class="project-option-recent-badge">Recent</span>' : ''}
+          </div>
+        `;
+      }).join('');
+      
+      // Add quick action buttons at the top of the dropdown
+      if (sortedProjects.length > 0) {
+        const quickActions = document.createElement('div');
+        quickActions.className = 'project-quick-actions';
+        quickActions.innerHTML = `
+          <div class="quick-actions-header">Quick Actions:</div>
+          <button type="button" onclick="selectAllProjects()" class="quick-action-btn">Select All</button>
+          <button type="button" onclick="clearAllProjects()" class="quick-action-btn">Clear All</button>
+          ${recentProjects.length > 0 ? '<button type="button" onclick="selectRecentProjects()" class="quick-action-btn">Recent Only</button>' : ''}
+        `;
+        container.insertBefore(quickActions, container.firstChild);
+      }
+    }
+
+    // Handle keyboard navigation for project selector
+    function handleProjectSelectorKeydown(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleProjectSelector();
+      } else if (event.key === 'Escape') {
+        closeProjectSelector();
+      }
+    }
+
+    // Handle keyboard navigation in search input
+    function handleSearchKeydown(event) {
+      if (event.key === 'Escape') {
+        closeProjectSelector();
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        focusFirstVisibleOption();
+      }
+    }
+
+    // Focus the first visible project option
+    function focusFirstVisibleOption() {
+      const visibleOptions = document.querySelectorAll('.project-option:not([style*="display: none"])');
+      if (visibleOptions.length > 0) {
+        visibleOptions[0].focus();
+      }
+    }
+
+    // Update aria attributes when opening/closing dropdown
+    function updateAriaAttributes() {
+      const trigger = document.querySelector('.project-selector-trigger');
+      trigger.setAttribute('aria-expanded', projectSelectorOpen.toString());
+    }
+
+    // Quick action buttons for project selection
+    function selectAllProjects() {
+      allProjects.forEach(project => {
+        selectedProjects.add(project.name);
+        updateRecentProjects(project.name);
+      });
+      
+      // Update all checkboxes
+      document.querySelectorAll('.project-option-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+        checkbox.closest('.project-option').classList.add('selected');
+      });
+      
+      updateProjectSelectorDisplay();
+      updateSelectedProjectsPills();
+      saveSelectedProjects();
+    }
+
+    function clearAllProjects() {
+      selectedProjects.clear();
+      
+      // Update all checkboxes
+      document.querySelectorAll('.project-option-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.project-option').classList.remove('selected');
+      });
+      
+      updateProjectSelectorDisplay();
+      updateSelectedProjectsPills();
+      saveSelectedProjects();
+    }
+
+    // Quick select recent projects
+    function selectRecentProjects() {
+      const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
+      
+      recentProjects.forEach(projectName => {
+        if (allProjects.some(p => p.name === projectName)) {
+          selectedProjects.add(projectName);
+          
+          // Update checkbox if visible
+          const checkbox = document.querySelector(`input[value="${projectName}"]`);
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.closest('.project-option').classList.add('selected');
+          }
+        }
+      });
+      
+      updateProjectSelectorDisplay();
+      updateSelectedProjectsPills();
+      saveSelectedProjects();
+    }
 
     /********************************************
      * FETCH PROJECTS
@@ -719,8 +1361,7 @@
     async function connectAndFetchProjects() {
       const organization = document.getElementById('organization').value.trim();
       const pat = document.getElementById('pat').value.trim();
-      const projectContainer = document.getElementById('projectContainer');
-      const projectList = document.getElementById('projectList');
+      const projectSelectorWidget = document.getElementById('projectSelectorWidget');
       const fetchPrsBtn = document.getElementById('fetchPrsBtn');
       const resultsDiv = document.getElementById('results');
 
@@ -728,7 +1369,6 @@
       resultsDiv.innerHTML = '<p>Connecting to Azure DevOps and loading projects...</p>';
 
       // Clear previous state
-      projectList.innerHTML = '';
       allProjects = [];
       selectedProjects.clear(); // Reset selection
 
@@ -769,15 +1409,23 @@
         console.log(`Found ${allProjects.length} projects`);
 
         if (allProjects.length > 0) {
-          // Show project container
-          projectContainer.classList.remove('hidden');
+          // Show project selector widget
+          projectSelectorWidget.classList.remove('hidden');
           fetchPrsBtn.classList.remove('hidden');
           // Show auto-refresh controls
           document.getElementById('autoRefreshControls').classList.remove('hidden');
 
-          // Render all projects with the new rendering function
-          renderProjectPage(allProjects);
-          resultsDiv.innerHTML = `<p>Successfully loaded ${allProjects.length} projects. Please select the projects you want to monitor.</p>`;
+          // Load saved project selections
+          loadSavedProjectSelections();
+
+          // Render project options in the dropdown
+          renderProjectOptions(allProjects);
+          
+          // Update display
+          updateProjectSelectorDisplay();
+          updateSelectedProjectsPills();
+
+          resultsDiv.innerHTML = `<p>Successfully loaded ${allProjects.length} projects. Select projects using the dropdown above to monitor their pull requests.</p>`;
         } else {
           resultsDiv.innerHTML = '<p>No projects found or you do not have access. Please check your organization name and PAT permissions.</p>';
         }
@@ -793,81 +1441,14 @@
       }
     }
 
-    /********************************************
-     * PAGINATION: PROJECTS
-     ********************************************/
-
-    // Auto-refresh variables
-    let autoRefreshEnabled = false;
-    let refreshTimer = null;
-    let lastRefreshTime = null;
-
-    function renderProjectPage(projects) {
-      const projectList = document.getElementById('projectList');
-      projectList.innerHTML = '';
-
-      // Get recent projects from localStorage
-      const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-
-      // Sort projects: first recent projects, then alphabetically
-      projects.sort((a, b) => {
-        const aIsRecent = recentProjects.includes(a.name);
-        const bIsRecent = recentProjects.includes(b.name);
-
-        if (aIsRecent && !bIsRecent) return -1;
-        if (!aIsRecent && bIsRecent) return 1;
-
-        return a.name.localeCompare(b.name);
-      });
-
-      // Render all projects
-      projects.forEach(proj => {
-        // Container for each project entry
-        const container = document.createElement('div');
-        container.classList.add('project-item');
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.name = 'projects';
-        checkbox.value = proj.name;
-        // Assign an ID matching the project name
-        checkbox.id = proj.name;
-
-        // If previously selected, keep it checked
-        if (selectedProjects.has(proj.name)) {
-          checkbox.checked = true;
-          container.classList.add('selected-project');
-        }
-
-        // Listen for changes and update the global selection set
-        checkbox.addEventListener('change', () => {
-          if (checkbox.checked) {
-            selectedProjects.add(proj.name);
-            updateRecentProjects(proj.name);
-            container.classList.add('selected-project');
-          } else {
-            selectedProjects.delete(proj.name);
-            container.classList.remove('selected-project');
-          }
-          updateSelectedCount();
-          saveSelectedProjects(); // Save to localStorage whenever selection changes
-        });
-
-        // Create label, link it to the checkbox via htmlFor
-        const label = document.createElement('label');
-        label.textContent = proj.name;
-        label.htmlFor = proj.name;
-
-        container.appendChild(checkbox);
-        container.appendChild(label);
-        projectList.appendChild(container);
-      });
-
-      // Update the selected count
-      updateSelectedCount();
+    // Load saved project selections from localStorage
+    function loadSavedProjectSelections() {
+      const savedProjectsString = localStorage.getItem('selectedProjects');
+      if (savedProjectsString) {
+        const savedProjects = JSON.parse(savedProjectsString);
+        savedProjects.forEach(project => selectedProjects.add(project));
+      }
     }
-
-    // Removed the setupProjectPagination function as it's no longer needed with the new UI
 
     /********************************************
      * AUTO-REFRESH FUNCTIONS
@@ -1208,76 +1789,6 @@
       organizationInput.addEventListener('input', saveOrganization);
       organizationInput.addEventListener('blur', saveOrganization);
     });
-
-    /********************************************
-     * PROJECT SEARCH & SELECTION FUNCTIONS
-     ********************************************/
-    // Filter projects based on search term
-    function filterProjects(searchTerm) {
-      searchTerm = searchTerm.toLowerCase();
-      const projectItems = document.querySelectorAll('.project-item');
-
-      let visibleCount = 0;
-      projectItems.forEach(item => {
-        const projectName = item.querySelector('label').textContent.toLowerCase();
-        if (projectName.includes(searchTerm)) {
-          item.style.display = '';
-          visibleCount++;
-        } else {
-          item.style.display = 'none';
-        }
-      });
-
-      return visibleCount;
-    }
-
-    // Clear the project search field
-    function clearProjectSearch() {
-      document.getElementById('projectSearch').value = '';
-      filterProjects('');
-    }
-
-    // Select all visible projects
-    function selectAllVisibleProjects() {
-      const visibleProjects = document.querySelectorAll('.project-item:not([style*="display: none"]) input[type="checkbox"]');
-      visibleProjects.forEach(checkbox => {
-        checkbox.checked = true;
-        selectedProjects.add(checkbox.value);
-        checkbox.closest('.project-item').classList.add('selected-project');
-      });
-      updateSelectedCount();
-      saveSelectedProjects(); // Save to localStorage whenever selection changes
-    }
-
-    // Deselect all projects
-    function deselectAllProjects() {
-      document.querySelectorAll('.project-item input[type="checkbox"]').forEach(checkbox => {
-        checkbox.checked = false;
-        checkbox.closest('.project-item').classList.remove('selected-project');
-      });
-      selectedProjects.clear();
-      updateSelectedCount();
-      saveSelectedProjects(); // Save to localStorage whenever selection changes
-    }
-
-    // Invert the selection of visible projects
-    function invertSelection() {
-      document.querySelectorAll('.project-item:not([style*="display: none"]) input[type="checkbox"]').forEach(checkbox => {
-        checkbox.checked = !checkbox.checked;
-        if (checkbox.checked) {
-          selectedProjects.add(checkbox.value);
-        } else {
-          selectedProjects.delete(checkbox.value);
-        }
-      });
-      updateSelectedCount();
-      saveSelectedProjects(); // Save to localStorage whenever selection changes
-    }
-
-    // Update the selected projects count display
-    function updateSelectedCount() {
-      document.getElementById('selectedCount').textContent = `${selectedProjects.size} selected`;
-    }
   </script>
 </body>
 
