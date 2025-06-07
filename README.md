@@ -12,28 +12,24 @@ The application offers real-time monitoring with auto-refresh capabilities, maki
 
 - A modern web browser (Chrome, Firefox, Edge, etc.)
 - An Azure DevOps organization
-- A Personal Access Token (PAT) with read access to your Azure DevOps projects
+- An Entra ID (Azure AD) application configured for OAuth2
 
 ### Connecting to Azure DevOps
 
-1. **Create a Personal Access Token (PAT)**:
-   - Log in to your Azure DevOps organization
-   - Go to User Settings (top right) > Personal access tokens
-   - Click "New Token"
-   - Name your token
-   - Set the organization where you want to use the token
-   - For Scopes, select "Custom defined" and ensure "Code (read) and Project and Team (read)" permission is checked
-   - Set an expiration date
-   - Click "Create"
-   - Copy the generated token (you won't be able to see it again)
+1. **Create an Entra ID application**:
+   - Open the Azure portal and go to **Azure Active Directory** > **App registrations**.
+   - Click **New registration**, choose *SPA* and note the **Application (client) ID**.
+   - Add a redirect URI of `https://&lt;your-host&gt;/auth-complete.html`.
+   - Under **API permissions**, add the **Azure DevOps** delegated scopes `vso.code`, `vso.project` and `vso.profile` (or use the `.default` scope).
 
-2. **Connect to Azure DevOps Pull Request Hub**:
-   - Open the application in your browser
-   - Enter your Azure DevOps organization name in the "Organization" field
-   - Paste your PAT in the "Personal Access Token" field
-   - Click "Connect"
-   - Once connected, select the projects you want to monitor
-   - Click "Fetch Pull Requests" to view open PRs
+2. **Configure the app**:
+   - Edit `auth.js` and replace `<CLIENT_ID>` with your Application ID.
+   - Replace `<AUTHORITY>` with your tenant authority URL (e.g. `https://login.microsoftonline.com/<tenant>`).
+
+3. **Use the Pull Request Hub**:
+   - Serve the files on any static host or open `index.html` locally.
+   - Click **Sign in** and complete the OAuth prompt.
+   - Enter your organization name, connect, and fetch pull requests.
 
 ## Features
 
@@ -63,8 +59,8 @@ The application offers real-time monitoring with auto-refresh capabilities, maki
 
 ## Privacy and Security
 
-- Your Personal Access Token is used only for API authentication and is never stored on any server
-- All data processing happens in your browser
+- OAuth tokens are acquired in your browser and never leave your device
+- All data processing happens client-side
 - No data is sent to any third-party services
 
 ### Running the Application

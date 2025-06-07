@@ -79,36 +79,6 @@
       border-color: rgba(255, 255, 255, 0.5);
     }
 
-    .header-pat-input {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header-pat-input label {
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .header-pat-input input {
-      padding: 6px 10px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      min-width: 200px;
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    .header-pat-input input::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .header-pat-input input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
-    }
 
     .header-connect-btn {
       padding: 8px 16px;
@@ -128,6 +98,11 @@
     .header-right {
       display: flex;
       align-items: center;
+      gap: 10px;
+    }
+
+    .user-info {
+      font-weight: 500;
     }
 
     /* Dark mode header styles */
@@ -151,20 +126,6 @@
       border-color: rgba(255, 255, 255, 0.3);
     }
 
-    body.dark-mode .header-pat-input input {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: #f3f3f3;
-    }
-
-    body.dark-mode .header-pat-input input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    body.dark-mode .header-pat-input input:focus {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
 
     body.dark-mode .header-connect-btn {
       background: #cc7000;
@@ -1021,6 +982,8 @@
       }
     }
   </style>
+  <script src="https://alcdn.msauth.net/browser/3.12.1/js/msal-browser.min.js"></script>
+  <script src="auth.js"></script>
 </head>
 
 <body class="light-mode">
@@ -1031,10 +994,6 @@
       <div class="header-org-input">
         <label for="organization">Organization:</label>
         <input type="text" id="organization" placeholder="Your organization name" required>
-      </div>
-      <div class="header-pat-input">
-        <label for="pat">Personal Access Token:</label>
-        <input type="password" id="pat" placeholder="Your PAT" required>
       </div>
       <button class="header-connect-btn" onclick="connectAndFetchProjects()">Connect</button>
 
@@ -1056,6 +1015,9 @@
       </div>
     </div>
     <div class="header-right">
+      <span id="userInfo" class="user-info hidden"></span>
+      <button id="loginBtn" class="header-connect-btn" onclick="handleLogin()">Sign in</button>
+      <button id="logoutBtn" class="header-connect-btn hidden" onclick="handleLogout()">Sign out</button>
       <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
     </div>
   </div>
@@ -1123,7 +1085,6 @@
       }
     }
 
-    let authHeader = '';
     let allProjects = [];
     let projectSelectorOpen = false;
 
@@ -1464,7 +1425,6 @@
      ********************************************/
     async function connectAndFetchProjects() {
       const organization = document.getElementById('organization').value.trim();
-      const pat = document.getElementById('pat').value.trim();
       const projectSelectorWidget = document.getElementById('projectSelectorWidget');
       const fetchPrsBtn = document.getElementById('fetchPrsBtn');
       const resultsDiv = document.getElementById('results');
@@ -1476,13 +1436,13 @@
       allProjects = [];
       selectedProjects.clear(); // Reset selection
 
-      if (!organization || !pat) {
-        resultsDiv.innerHTML = '<p>Please provide both organization and PAT.</p>';
+      if (!organization) {
+        resultsDiv.innerHTML = '<p>Please provide an organization name.</p>';
         return;
       }
 
-      // Convert PAT to Base64 for Basic Auth
-      authHeader = 'Basic ' + btoa(':' + pat);
+      const token = await auth.getToken();
+      const authHeader = 'Bearer ' + token;
 
       // Updated API URL with top parameter to ensure we get all projects
       const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1&$top=1000`;
@@ -1531,7 +1491,7 @@
 
           resultsDiv.innerHTML = `<p>Successfully loaded ${allProjects.length} projects. Select projects using the dropdown above to monitor their pull requests.</p>`;
         } else {
-          resultsDiv.innerHTML = '<p>No projects found or you do not have access. Please check your organization name and PAT permissions.</p>';
+          resultsDiv.innerHTML = '<p>No projects found or you do not have access. Please check your organization name and permissions.</p>';
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -1539,8 +1499,7 @@
                                <p>Please check:</p>
                                <ul>
                                  <li>Your organization name is correct</li>
-                                 <li>Your PAT has sufficient permissions (needs <code>Read</code> access for <code>Project and Team</code>)</li>
-                                 <li>Your PAT has not expired</li>
+                               <li>Your account has sufficient permissions</li>
                                </ul>`;
       }
     }
@@ -1698,7 +1657,7 @@
       // The user might have selected multiple pages, so read from our global set
       const checkedProjects = Array.from(selectedProjects);
 
-      if (!organization || !authHeader || checkedProjects.length === 0) {
+      if (!organization || checkedProjects.length === 0) {
         resultsDiv.innerHTML = '<p>Please connect and select at least one project.</p>';
         return;
       }
@@ -1711,10 +1670,11 @@
         const url = `https://dev.azure.com/${organization}/${projectName}/_apis/git/pullrequests?api-version=7.1`;
 
         try {
+          const token = await auth.getToken();
           const response = await fetch(url, {
             method: 'GET',
             headers: {
-              'Authorization': authHeader,
+              'Authorization': 'Bearer ' + token,
               'Content-Type': 'application/json'
             }
           });
@@ -1882,6 +1842,32 @@
     function saveOrganization() {
       const organization = document.getElementById('organization').value.trim();
       localStorage.setItem('organization', organization);
+    }
+
+    async function handleLogin() {
+      const account = await auth.login();
+      if (account) {
+        try {
+          const token = await auth.getToken();
+          const resp = await fetch('https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=7.1', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const profile = await resp.json();
+          document.getElementById('userInfo').textContent = profile.displayName || account.name || account.username || '';
+        } catch (e) {
+          document.getElementById('userInfo').textContent = account.name || account.username || '';
+        }
+        document.getElementById('userInfo').classList.remove('hidden');
+        document.getElementById('loginBtn').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      auth.logout();
+      document.getElementById('userInfo').classList.add('hidden');
+      document.getElementById('loginBtn').classList.remove('hidden');
+      document.getElementById('logoutBtn').classList.add('hidden');
     }
 
     // Load preferences on page load
