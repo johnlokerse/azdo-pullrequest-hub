@@ -92,11 +92,11 @@ If you have admin rights and want to skip user consent prompts:
 3. Replace `YOUR_CLIENT_ID_HERE` with your actual Client ID:
 ```javascript
 const CONFIG = {
-    clientId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', // ← Your Client ID here
-    redirectUri: 'http://localhost:8000',
-    authority: 'https://login.microsoftonline.com/organizations',
-    scopes: ['499b84ac-1321-427f-aa17-267ca6975798/.default'],
-    azureDevOpsResourceId: '499b84ac-1321-427f-aa17-267ca6975798'
+      clientId: '<CLIENT ID>', // Replace with your Client ID from Entra ID
+      redirectUri: 'http://localhost:8000',
+      authority: 'https://login.microsoftonline.com/<TENANT ID>',
+      scopes: ['499b84ac-1321-427f-aa17-267ca6975798/.default'],
+      azureDevOpsResourceId: '499b84ac-1321-427f-aa17-267ca6975798'
 };
 ```
 
