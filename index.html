@@ -1,1908 +1,1944 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <title>Azure DevOps Pull Requests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azure DevOps Pull Request Hub</title>
   <style>
+    /* Typography, spacing, and theme system */
+    :root {
+      --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'SFMono-Regular', 'Segoe UI Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+      --primary: #0078d4;
+      --primary-hover: #106ebe;
+      --success: #3fb950;
+      --warning: #f59f00;
+      --danger: #e5534b;
+      --bg-primary: #f7f9fc;
+      --bg-secondary: #eef2f8;
+      --surface: #ffffff;
+      --surface-muted: #f2f5fa;
+      --text-primary: #0f172a;
+      --text-secondary: #4b5563;
+      --text-tertiary: #6b7280;
+      --border: #d8dee9;
+      --shadow-soft: 0 10px 30px rgba(17, 24, 39, 0.08);
+      --shadow-hover: 0 22px 48px rgba(17, 24, 39, 0.12);
+      --glass: rgba(255, 255, 255, 0.7);
+      --gradient-header: linear-gradient(135deg, #0b63ce 0%, #3f8cff 50%, #5d5be7 100%);
+      --gradient-soft: linear-gradient(135deg, rgba(0, 120, 212, 0.08), rgba(93, 91, 231, 0.06));
+
+      --space-1: clamp(0.25rem, 0.2rem + 0.25vw, 0.375rem);
+      --space-2: clamp(0.5rem, 0.45rem + 0.25vw, 0.75rem);
+      --space-3: clamp(0.75rem, 0.7rem + 0.25vw, 1rem);
+      --space-4: clamp(1rem, 0.95rem + 0.35vw, 1.35rem);
+      --space-5: clamp(1.5rem, 1.4rem + 0.5vw, 2rem);
+      --space-6: clamp(2rem, 1.85rem + 0.75vw, 2.75rem);
+      --space-8: clamp(3rem, 2.75rem + 1vw, 4.25rem);
+
+      --text-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+      --text-sm: clamp(0.85rem, 0.8rem + 0.2vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+      --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.35rem);
+      --text-xl: clamp(1.35rem, 1.2rem + 0.45vw, 1.65rem);
+      --text-2xl: clamp(1.6rem, 1.4rem + 0.65vw, 2rem);
+
+      --leading-tight: 1.2;
+      --leading-normal: 1.5;
+      --leading-relaxed: 1.7;
+
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --primary: #4a9eff;
+      --primary-hover: #6eb4ff;
+      --success: #3fb950;
+      --warning: #ffb347;
+      --danger: #ff6b6b;
+      --bg-primary: #0d1117;
+      --bg-secondary: #0f172a;
+      --surface: #161b22;
+      --surface-muted: #0d1117;
+      --text-primary: #e6edf3;
+      --text-secondary: #9ba7b4;
+      --text-tertiary: #6e7681;
+      --border: #2d333b;
+      --shadow-soft: 0 16px 45px rgba(0, 0, 0, 0.45);
+      --shadow-hover: 0 26px 65px rgba(0, 0, 0, 0.6);
+      --glass: rgba(22, 27, 34, 0.7);
+      --gradient-header: linear-gradient(135deg, #0b2347 0%, #0d325f 50%, #111826 100%);
+      --gradient-soft: linear-gradient(135deg, rgba(74, 158, 255, 0.08), rgba(93, 91, 231, 0.05));
+
+      color-scheme: dark;
+    }
+
     * {
       box-sizing: border-box;
+      transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
     }
 
     body {
+      font-family: var(--font-primary);
+      background: var(--bg-primary);
+      color: var(--text-primary);
       margin: 0;
-      font-family: Arial, sans-serif;
-      transition: background 0.3s, color 0.3s;
-      position: relative;
-    }
-
-    .main-content {
-      margin: 20px;
-    }
-
-    /* Header Bar Styles */
-    .header-bar {
-      background: #0078d4;
-      color: #fff;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: background 0.3s, color 0.3s;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    .header-left h1 {
-      margin: 0;
-      font-size: 1.5em;
-      color: inherit;
-      white-space: nowrap;
-    }
-
-    .header-org-input {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header-org-input label {
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .header-org-input input {
-      padding: 6px 10px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      min-width: 200px;
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    .header-org-input input::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .header-org-input input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .header-pat-input {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header-pat-input label {
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .header-pat-input input {
-      padding: 6px 10px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      min-width: 200px;
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    .header-pat-input input::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .header-pat-input input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .header-connect-btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      background: #ff8c00;
-      color: #fff;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .header-connect-btn:hover {
-      background: #e67e00;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-    }
-
-    /* Dark mode header styles */
-    body.dark-mode .header-bar {
-      background: #2b2b2b;
-      color: #f3f3f3;
-    }
-
-    body.dark-mode .header-org-input input {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: #f3f3f3;
-    }
-
-    body.dark-mode .header-org-input input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    body.dark-mode .header-org-input input:focus {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    body.dark-mode .header-pat-input input {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: #f3f3f3;
-    }
-
-    body.dark-mode .header-pat-input input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    body.dark-mode .header-pat-input input:focus {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    body.dark-mode .header-connect-btn {
-      background: #cc7000;
-    }
-
-    body.dark-mode .header-connect-btn:hover {
-      background: #b36300;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-      transition: color 0.3s;
+      min-height: 100vh;
+      line-height: var(--leading-normal);
+      -webkit-font-smoothing: antialiased;
     }
 
     a {
+      color: inherit;
       text-decoration: none;
-      transition: color 0.3s;
     }
 
     a:hover {
-      text-decoration: underline;
+      text-decoration: none;
     }
 
-    /* Theme toggle button in the header */
-    .toggle-button {
-      cursor: pointer;
+    .container {
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: var(--space-5) var(--space-4) var(--space-6);
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        padding: var(--space-6);
+      }
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .section-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      background: var(--gradient-header);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-4);
+    }
+
+    @media (max-width: 767px) {
+      .header-inner {
+        padding: var(--space-3);
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       background: rgba(255, 255, 255, 0.2);
       color: #fff;
-      padding: 8px 12px;
+      font-weight: 700;
+      font-size: var(--text-base);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .brand-copy h1 {
+      margin: 0;
+      color: #fff;
+      font-size: var(--text-2xl);
+      line-height: var(--leading-tight);
+    }
+
+    .brand-copy .eyebrow {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: var(--text-xs);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 var(--space-1) 0;
+    }
+
+    .brand-copy .subhead {
+      margin: var(--space-1) 0 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: var(--text-sm);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 6px 12px;
+      border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-      transition: background 0.3s, border-color 0.3s;
-      font-size: 14px;
+      color: #fff;
+      font-size: var(--text-xs);
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
     }
 
-    .toggle-button:hover {
-      background: rgba(255, 255, 255, 0.3);
-      border-color: rgba(255, 255, 255, 0.5);
+    .theme-toggle {
+      background: #fff;
+      color: #0f172a;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      transition: transform var(--transition-base), box-shadow var(--transition-base);
+      min-height: 44px;
     }
 
-    body.dark-mode .toggle-button {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
     }
 
-    body.dark-mode .toggle-button:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.3);
+    [data-theme="dark"] .theme-toggle {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
     }
 
-    /* Empty state message styling */
-    .empty-state-message {
-      text-align: center;
-      font-size: 18px;
-      padding: 30px;
+    main {
       width: 100%;
     }
 
-    .horizontal-inputs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
+    /* Panels & sections */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: var(--space-5);
+      position: relative;
+      overflow: hidden;
     }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
+    .panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-soft);
+      opacity: 0.6;
+      pointer-events: none;
+      mix-blend-mode: lighten;
     }
 
-    .input-group label {
-      margin-bottom: 4px;
+    [data-theme="dark"] .panel::before {
+      opacity: 0.25;
+      mix-blend-mode: screen;
     }
 
-    input[type='text'],
-    input[type='password'] {
-      padding: 6px;
-      border-radius: 4px;
-      border: 1px solid;
-      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    .panel > * {
+      position: relative;
+      z-index: 1;
     }
 
-    input[type='checkbox'] {
-      margin-right: 5px;
+    .panel.collapsed .collapsible-body {
+      display: none;
     }
 
-    .btn {
-      padding: 10px 15px;
+    h2 {
+      margin: 0 0 var(--space-2);
+      font-size: var(--text-xl);
+      line-height: var(--leading-tight);
+    }
+
+    p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+    }
+
+    .lead {
+      margin-bottom: var(--space-3);
+    }
+
+    /* Auth */
+    .auth-section {
+      text-align: center;
+    }
+
+    .auth-section .sign-in-button {
+      margin: var(--space-3) auto 0;
+      background: linear-gradient(135deg, var(--primary), #5d5be7);
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      transition: background 0.3s, color 0.3s;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .auth-section .sign-in-button:hover {
+      background: linear-gradient(135deg, var(--primary-hover), #6d6bf3);
+      transform: translateY(-1px);
+    }
+
+    .auth-section.hidden {
+      display: none;
     }
 
     .hidden {
-      display: none;
-    }
-
-    .auto-refresh-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .last-refreshed {
-      font-size: 0.9em;
-      font-style: italic;
-    }
-
-    .countdown {
-      font-size: 0.9em;
-      margin-left: 10px;
-      color: #0078d4;
-      font-weight: bold;
-    }
-
-    body.dark-mode .countdown {
-      color: #79bdfd;
-    }
-
-    /* PR Age Indicator Styles */
-    .pr-age-normal {
-      background-color: transparent;
-    }
-
-    .pr-age-warning {
-      background-color: #FFA500;
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: white;
-    }
-
-    .pr-age-critical {
-      background-color: #FF4500;
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: white;
-    }
-
-    body.dark-mode .pr-age-warning {
-      background-color: #B37700;
-    }
-
-    body.dark-mode .pr-age-critical {
-      background-color: #A52A2A;
-    }
-
-    .results {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .pagination {
-      margin-top: 10px;
-    }
-
-    .pagination button {
-      margin: 0 3px;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .pagination .current-page {
-      opacity: 0.85;
-    }
-
-    /*******************************************************
-     * Table Styles
-     *******************************************************/
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    thead th,
-    tbody td {
-      text-align: left;
-      border-bottom: 1px solid;
-      padding: 12px 16px;
-      /* spacing for clarity */
-    }
-
-    /*******************************************************
-     * Project Grid Styles
-     *******************************************************/
-    .project-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      /* 2 columns */
-      gap: 12px;
-      /* spacing between items */
-      margin-top: 8px;
-    }
-
-    .project-item {
-      display: flex;
-      align-items: center;
-    }
-
-    .project-item label {
-      margin-left: 5px;
-      cursor: pointer;
-    }
-
-    /*******************************************************
-     * Project Grid Styles
-     *******************************************************/
-    .project-management {
       display: none !important;
     }
 
-    body.dark-mode .project-management {
-      background: #333;
+    .error {
+      background: rgba(229, 83, 75, 0.08);
+      color: var(--danger);
+      padding: var(--space-3);
+      border-radius: var(--radius-sm);
+      margin-top: var(--space-3);
+      border: 1px solid var(--danger);
+      text-align: left;
     }
 
-    .project-management h2 {
-      margin-top: 0;
+    [data-theme="dark"] .error {
+      background: rgba(248, 81, 73, 0.1);
     }
 
-    .project-search {
-      position: relative;
-      margin-bottom: 10px;
+    .loading {
+      margin-top: var(--space-3);
+      color: var(--text-secondary);
     }
 
-    .project-search input {
-      width: 100%;
-      padding: 8px 30px 8px 10px;
-      border-radius: 4px;
-    }
-
-    .clear-btn {
-      position: absolute;
-      right: 5px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 0;
-      height: 20px;
-      width: 20px;
-      line-height: 1;
-      color: #666;
-    }
-
-    body.dark-mode .clear-btn {
-      color: #ccc;
-    }
-
-    .project-selection-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      gap: 10px;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .project-selection-actions .btn {
-      padding: 5px 10px;
-      font-size: 14px;
-      margin: 0;
-    }
-
-    #selectedCount {
-      font-weight: bold;
-    }
-
-    .saved-selections {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-      align-items: center;
-    }
-
-    .saved-selections select {
-      flex-grow: 1;
-      padding: 6px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      transition: background 0.3s, color 0.3s, border-color 0.3s;
-    }
-
-    body.dark-mode .saved-selections select {
-      background: #2b2b2b;
-      color: #fff;
-      border-color: #3f3f3f;
-    }
-
-    .project-container {
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin: 10px 0px;
-      width: auto;
-    }
-
-    body.dark-mode .project-container {
-      border-color: #3f3f3f;
-    }
-
-    .project-list {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .project-item {
-      padding: 8px 12px;
-      border-bottom: 1px solid #eee;
-    }
-
-    body.dark-mode .project-item {
-      border-bottom: 1px solid #3f3f3f;
-    }
-
-    .project-item:hover {
-      background-color: rgba(0, 120, 212, 0.05);
-    }
-
-    body.dark-mode .project-item:hover {
-      background-color: rgba(0, 120, 212, 0.15);
-    }
-
-    .project-item:last-child {
-      border-bottom: none;
-    }
-
-    .selected-project {
-      background-color: rgba(0, 120, 212, 0.08);
-    }
-
-    body.dark-mode .selected-project {
-      background-color: rgba(0, 120, 212, 0.2);
-    }
-
-    /*******************************************************
-     * New Project Grid Styles (deprecated)
-     *******************************************************/
-    /*******************************************************
-     * Light & Dark Themes
-     *******************************************************/
-    /* Light Mode */
-    body.light-mode {
-      background: #f4f4f4;
-      color: #1e1e1e;
-    }
-
-    body.light-mode a {
-      color: #005ea1;
-    }
-
-    body.light-mode .empty-state-message {
-      color: #555555;
-    }
-
-    body.light-mode input[type='text'],
-    body.light-mode input[type='password'] {
-      background: #fff;
-      color: #1e1e1e;
-      border-color: #ccc;
-    }
-
-    body.light-mode .btn {
-      background: #0078d4;
-      color: #fff;
-    }
-
-    body.light-mode .btn:hover {
-      background: #005ea1;
-    }
-
-    body.light-mode .results {
-      background: #fff;
-    }
-
-    body.light-mode .pagination button {
-      background-color: #ddd;
-      color: #000;
-    }
-
-    body.light-mode .pagination button.current-page {
-      background-color: #0078d4;
-      color: #fff;
-    }
-
-    /* Dark Mode */
-    body.dark-mode {
-      background: #1e1e1e;
-      color: #f3f3f3;
-    }
-
-    body.dark-mode a {
-      color: #79bdfd;
-    }
-
-    body.dark-mode .empty-state-message {
-      color: #b0b0b0;
-    }
-
-    body.dark-mode input[type='text'],
-    body.dark-mode input[type='password'] {
-      background: #2b2b2b;
-      color: #fff;
-      border-color: #3f3f3f;
-    }
-
-    body.dark-mode .btn {
-      background: #0078d4;
-      color: #fff;
-    }
-
-    body.dark-mode .btn:hover {
-      background: #005ea1;
-    }
-
-    body.dark-mode .results {
-      background: #2b2b2b;
-    }
-
-    body.dark-mode .pagination button {
-      background-color: #3f3f3f;
-      color: #fff;
-    }
-
-    body.dark-mode .pagination button.current-page {
-      background-color: #0078d4;
-      color: #fff;
-    }
-
-    /* Smart Project Selection Widget */
-    .project-selector-widget {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 300px;
-    }
-
-    .project-selector-label {
-      font-weight: 500;
-      white-space: nowrap;
-      font-size: 14px;
-    }
-
-    .project-selector-container {
-      position: relative;
-      flex: 1;
-    }
-
-    .project-selector-trigger {
+    /* User info */
+    .user-info {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 250px;
-      font-size: 14px;
-    }
-
-    .project-selector-trigger:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-
-    .project-selector-trigger.active {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .project-selector-text {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .project-selector-arrow {
-      margin-left: 8px;
-      font-size: 12px;
-      transition: transform 0.3s ease;
-    }
-
-    .project-selector-arrow.open {
-      transform: rotate(180deg);
-    }
-
-    .project-selector-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      max-height: 400px;
-      overflow-y: auto;
-      margin-top: 4px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: all 0.3s ease;
-    }
-
-    .project-selector-dropdown.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .project-search-input {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-      outline: none;
-      background: #f9f9f9;
-    }
-
-    .project-search-input::placeholder {
-      color: #999;
-    }
-
-    .project-options {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .project-option {
-      display: flex;
-      align-items: center;
-      padding: 10px 12px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-      border-bottom: 1px solid #f5f5f5;
-    }
-
-    .project-option:hover {
-      background: #f8f9fa;
-    }
-
-    .project-option.selected {
-      background: #e3f2fd;
-      color: #1976d2;
-    }
-
-    .project-option.recent {
-      background: linear-gradient(90deg, #fff3e0 0%, #fff 30%);
-      border-left: 3px solid #ff9800;
-    }
-
-    .project-option.recent.selected {
-      background: linear-gradient(90deg, #e1f5fe 0%, #e3f2fd 30%);
-      border-left-color: #1976d2;
-    }
-
-    .project-option-checkbox {
-      margin-right: 10px;
-    }
-
-    .project-option-name {
-      flex: 1;
-      font-size: 14px;
-      color: #333;
-      font-weight: 400;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .project-option-recent-badge {
-      font-size: 10px;
-      background: #ff9800;
-      color: white;
-      padding: 2px 6px;
-      border-radius: 10px;
-      margin-left: 8px;
-      font-weight: 500;
-    }
-
-    /* Quick Actions in Project Dropdown */
-    .project-quick-actions {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      background: #f8f9fa;
-      display: flex;
-      gap: 8px;
-      align-items: center;
+      gap: var(--space-3);
       flex-wrap: wrap;
     }
 
-    .quick-actions-header {
-      font-size: 12px;
-      font-weight: 600;
-      color: #666;
-      margin-right: 8px;
-    }
-
-    .quick-action-btn {
-      background: #0078d4;
-      color: white;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .quick-action-btn:hover {
-      background: #005ea1;
-    }
-
-    body.dark-mode .project-quick-actions {
-      background: #1e1e1e;
-      border-bottom-color: #3f3f3f;
-    }
-
-    body.dark-mode .quick-actions-header {
-      color: #ccc;
-    }
-
-    /* Selected Projects Pills */
-    .selected-projects-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-      max-width: 100%;
-    }
-
-    .project-pill {
-      display: inline-flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      animation: slideIn 0.3s ease;
-    }
-
-    .project-pill-remove {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.8);
-      margin-left: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 1;
-      padding: 0;
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-    }
-
-    .project-pill-remove:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* No Projects Message */
-    .no-projects-message {
-      margin: 40px 20px;
-      background: #f8f9fa;
-      border: 2px dashed #dee2e6;
-      border-radius: 12px;
-      padding: 40px 20px;
-      text-align: center;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      transition: all 0.3s ease;
-    }
-
-    .no-projects-message.hidden {
+    .user-info.hidden {
       display: none;
     }
 
-    .message-content h2 {
-      color: #495057;
-      margin: 0 0 16px 0;
-      font-size: 1.5em;
+    .user-details {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 220px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #5d5be7);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: var(--text-lg);
+      box-shadow: var(--shadow-soft);
+      transition: transform var(--transition-base);
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.05);
+    }
+
+    .sign-out-button {
+      background: var(--danger);
+      border: none;
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      min-height: 44px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .sign-out-button:hover {
+      background: #c44141;
+    }
+
+    /* Forms */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      margin-bottom: var(--space-3);
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 0.85rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      color: var(--text-primary);
+      font-size: var(--text-base);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.15);
+      background: var(--surface);
+    }
+
+    [data-theme="dark"] input[type="text"],
+    [data-theme="dark"] select {
+      background: #0f1623;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--space-4);
+      align-items: end;
+    }
+
+    #fetchPRBtn {
+      margin-top: var(--space-3);
+    }
+
+    .collapse-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      cursor: pointer;
+      min-height: 36px;
+    }
+
+    .collapse-toggle:hover {
+      background: var(--surface);
+      border-color: var(--primary);
+    }
+
+    .collapse-toggle .chevron {
+      display: inline-block;
+      transition: transform var(--transition-base);
+    }
+
+    .panel.collapsed .collapse-toggle .chevron {
+      transform: rotate(-90deg);
+    }
+
+    .project-selection {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-2);
+      margin-top: var(--space-2);
+    }
+
+    @media (max-width: 480px) {
+      .project-selection {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+    }
+
+    .project-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      transition: border-color var(--transition-base), transform var(--transition-base), background-color var(--transition-base);
+      min-height: 44px;
+    }
+
+    .project-checkbox:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .project-checkbox label {
+      flex: 1;
+      min-width: 0;
+      word-break: break-word;
+      white-space: normal;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-top: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      padding: 0.65rem 1rem;
+      min-width: 110px;
+    }
+
+    .pagination-status {
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    /* Buttons */
+    button {
+      font-family: var(--font-primary);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      padding: 0.75rem 1.2rem;
+      background: var(--primary);
+      color: #fff;
+      transition: transform var(--transition-base), box-shadow var(--transition-base), background-color var(--transition-fast);
+      min-height: 44px;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Controls bar */
+    .controls {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      flex-wrap: wrap;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-soft);
+      position: sticky;
+      top: var(--space-3);
+      z-index: 10;
+    }
+
+    [data-theme="dark"] .controls {
+      background: var(--glass);
+    }
+
+    .checkbox-group {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      min-height: 44px;
+    }
+
+    .status-info {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      flex-wrap: wrap;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    /* PR list */
+    .pr-list {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .pr-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pr-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: var(--space-3);
+      transition: transform var(--transition-base), box-shadow var(--transition-base);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      border-left: 6px solid var(--primary);
+    }
+
+    .pr-card:hover {
+      transform: translateY(-1px) scale(1.005);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .pr-card.warning {
+      border-left-color: var(--warning);
+    }
+
+    .pr-card.critical {
+      border-left-color: var(--danger);
+    }
+
+    .pr-card.draft {
+      opacity: 0.95;
+      border-style: dashed;
+    }
+
+    .pr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .pr-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      min-width: 0;
+    }
+
+    .pr-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: var(--leading-tight);
+      word-break: break-word;
+    }
+
+    .pr-title:hover {
+      text-decoration: underline;
+    }
+
+    .pr-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(0, 120, 212, 0.12);
+      color: var(--primary);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      border: 1px solid rgba(0, 120, 212, 0.25);
+    }
+
+    .pill-muted {
+      background: var(--surface-muted);
+      border-color: var(--border);
+      color: var(--text-secondary);
       font-weight: 600;
     }
 
-    .message-content p {
-      color: #6c757d;
-      margin: 0 0 20px 0;
-      font-size: 16px;
-      line-height: 1.5;
+    .pr-age {
+      font-size: var(--text-xs);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      white-space: nowrap;
     }
 
-    .message-icon {
-      font-size: 48px;
-      margin-top: 10px;
-      opacity: 0.6;
+    .pr-age.warning {
+      background: rgba(245, 159, 0, 0.15);
+      color: var(--warning);
+      border-color: rgba(245, 159, 0, 0.4);
     }
 
-    /* Dark mode styles for no projects message */
-    body.dark-mode .no-projects-message {
-      background: #2b2b2b;
-      border-color: #495057;
+    .pr-age.critical {
+      background: rgba(229, 83, 75, 0.15);
+      color: var(--danger);
+      border-color: rgba(229, 83, 75, 0.35);
     }
 
-    body.dark-mode .message-content h2 {
-      color: #f8f9fa;
+    .pr-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-1);
     }
 
-    body.dark-mode .message-content p {
-      color: #adb5bd;
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 8px 10px;
+      background: var(--surface-muted);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      min-height: 44px;
     }
 
-    /* Dark mode styles for project selector */
-    body.dark-mode .project-selector-dropdown {
-      background: #2b2b2b;
-      border-color: #3f3f3f;
-      color: #f3f3f3;
+    .meta-icon {
+      font-size: 1rem;
     }
 
-    body.dark-mode .project-search-input {
-      background: #1e1e1e;
-      color: #f3f3f3;
-      border-bottom-color: #3f3f3f;
+    .pr-branches {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-1);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
     }
 
-    body.dark-mode .project-search-input::placeholder {
-      color: #888;
+    .branch-tag {
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    body.dark-mode .project-option {
-      border-bottom-color: #3f3f3f;
-      color: #f3f3f3;
+    .branch-sep {
+      opacity: 0.7;
     }
 
-    body.dark-mode .project-option-name {
-      color: #f3f3f3;
+    /* Empty and loading */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-6) var(--space-3);
+      color: var(--text-secondary);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-soft);
     }
 
-    body.dark-mode .project-option:hover {
-      background: #3f3f3f;
+    .empty-state h3 {
+      margin-bottom: var(--space-2);
+      font-size: var(--text-lg);
+      color: var(--text-primary);
     }
 
-    body.dark-mode .project-option.selected {
-      background: #1e3a5f;
-      color: #79bdfd;
-    }
-
-    body.dark-mode .project-option.recent {
-      background: linear-gradient(90deg, #2d1b00 0%, #2b2b2b 30%);
-      border-left-color: #cc7000;
-    }
-
-    body.dark-mode .project-option.recent.selected {
-      background: linear-gradient(90deg, #1e3a5f 0%, #1e3a5f 30%);
-      border-left-color: #79bdfd;
-    }
-
-    body.dark-mode .project-option-recent-badge {
-      background: #cc7000;
-    }
-
-    /* Dark mode styles for selected projects pills container */
-    body.dark-mode #selectedProjectsPills {
-      background: rgba(43, 43, 43, 0.8) !important;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1200px) {
-      .header-left {
-        flex-wrap: wrap;
+    /* Responsive adjustments */
+    @media (max-width: 767px) {
+      .panel {
+        padding: var(--space-4);
       }
 
-      .project-selector-widget {
-        min-width: 250px;
-      }
-
-      .project-selector-trigger {
-        min-width: 200px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .header-bar {
+      .controls {
         flex-direction: column;
         align-items: stretch;
-        gap: 10px;
       }
 
-      .header-left {
-        flex-direction: column;
-        gap: 10px;
+      .user-info {
+        align-items: flex-start;
+      }
+    }
+
+    @media (min-width: 1440px) {
+      .container {
+        max-width: 1600px;
+      }
+    }
+
+    /* Accessibility: reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
       }
 
-      .header-left h1 {
-        font-size: 1.2em;
-      }
-
-      .project-selector-widget {
-        min-width: auto;
-        width: 100%;
-      }
-
-      .project-selector-trigger {
-        min-width: auto;
-      }
-
-      .selected-projects-pills {
-        padding: 8px 10px !important;
-      }
-
-      .project-pill {
-        font-size: 11px;
+      .theme-toggle:hover,
+      .project-checkbox:hover,
+      .pr-card:hover {
+        transform: none;
       }
     }
   </style>
 </head>
 
-<body class="light-mode">
-  <!-- Header Bar -->
-  <div class="header-bar">
-    <div class="header-left">
-      <h1>Azure DevOps Pull Requests</h1>
-      <div class="header-org-input">
-        <label for="organization">Organization:</label>
-        <input type="text" id="organization" placeholder="Your organization name" required>
-      </div>
-      <div class="header-pat-input">
-        <label for="pat">Personal Access Token:</label>
-        <input type="password" id="pat" placeholder="Your PAT" required>
-      </div>
-      <button class="header-connect-btn" onclick="connectAndFetchProjects()">Connect</button>
-
-      <!-- Smart Project Selection Widget -->
-      <div id="projectSelectorWidget" class="project-selector-widget hidden">
-        <span class="project-selector-label">Projects:</span>
-        <div class="project-selector-container">
-          <div class="project-selector-trigger" onclick="toggleProjectSelector()" tabindex="0" role="button"
-            aria-haspopup="listbox" aria-expanded="false" onkeydown="handleProjectSelectorKeydown(event)">
-            <span class="project-selector-text" id="projectSelectorText">Select projects...</span>
-            <span class="project-selector-arrow" id="projectSelectorArrow">▼</span>
-          </div>
-          <div class="project-selector-dropdown" id="projectSelectorDropdown" role="listbox">
-            <input type="text" class="project-search-input" id="projectSearchInput" placeholder="Search projects..."
-              oninput="filterProjectOptions(this.value)" onkeydown="handleSearchKeydown(event)">
-            <div class="project-options" id="projectOptions"></div>
-          </div>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-mark">PR</div>
+        <div class="brand-copy">
+          <p class="eyebrow">Azure DevOps</p>
+          <h1>Pull Request Hub</h1>
+          <p class="subhead">Monitor, triage, and act on pull requests across every project.</p>
         </div>
       </div>
-    </div>
-    <div class="header-right">
-      <button class="toggle-button" onclick="toggleTheme()">Toggle Theme</button>
-    </div>
-  </div>
-
-  <!-- Selected Projects Pills (shown below header when projects are selected) -->
-  <div id="selectedProjectsPills" class="selected-projects-pills hidden"
-    style="padding: 8px 20px; background: rgba(0, 120, 212, 0.7);"></div>
-
-  <!-- No Projects Selected Message -->
-  <div id="noProjectsMessage" class="no-projects-message">
-    <div class="message-content">
-      <h2>Welcome to Azure DevOps Pull Request Hub</h2>
-      <p>Select your project(s) using the project dropdown in the top right to get started monitoring pull requests.</p>
-      <div class="message-icon">📋</div>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main-content hidden">
-
-    <!-- Button to fetch PRs -->
-    <button id="fetchPrsBtn" class="btn hidden" onclick="fetchPullRequests()">
-      Fetch Pull Requests
-    </button>
-
-    <!-- Auto-refresh controls -->
-    <div id="autoRefreshControls" class="hidden auto-refresh-controls">
-      <label for="autoRefreshToggle">
-        <input type="checkbox" id="autoRefreshToggle" onclick="toggleAutoRefresh()">
-        Auto-refresh
-      </label>
-      <select id="refreshInterval" onchange="updateRefreshInterval()">
-        <option value="60000">Every 1 minute</option>
-        <option value="300000" selected>Every 5 minutes</option>
-        <option value="600000">Every 10 minutes</option>
-        <option value="1800000">Every 30 minutes</option>
-      </select>
-      <span id="lastRefreshed" class="last-refreshed hidden">Last refreshed: Never</span>
-      <span id="countdownTimer" class="countdown hidden">Next refresh in: 5:00</span>
-
-      <div class="filter-controls">
-        <label for="hideDraftPRs">
-          <input type="checkbox" id="hideDraftPRs" checked onchange="hideDraftPRsChanged()">
-          Hide draft PRs
-        </label>
+      <div class="header-actions">
+        <div class="chip">Live monitor</div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-icon">🌓</span>
+          <span class="theme-label">Theme</span>
+        </button>
       </div>
     </div>
+  </header>
 
-    <div class="results" id="results"></div>
+  <main class="container content">
+    <div class="section-stack">
+      <!-- Authentication Section -->
+      <div class="panel auth-section" id="authSection">
+        <h2>Sign in to Azure DevOps</h2>
+        <p class="lead">Use your Microsoft account to securely access pull requests without copying PATs.</p>
+        <button class="sign-in-button" onclick="signIn()" id="signInButton">
+          <span>🔐</span>
+          <span>Sign in with Microsoft</span>
+        </button>
+        <div id="authError" class="error" style="display: none;"></div>
+        <div id="authLoading" class="loading" style="display: none;">
+          <p>🔄 Authenticating...</p>
+        </div>
+      </div>
 
-  </div> <!-- End main-content -->
+      <!-- User Info Section -->
+      <div class="user-info panel hidden" id="userInfo">
+        <div class="user-details">
+          <div class="user-avatar" id="userAvatar"></div>
+          <div>
+            <div style="font-weight: 700; font-size: var(--text-base);" id="userName"></div>
+            <div style="font-size: var(--text-sm); color: var(--text-secondary);" id="userEmail"></div>
+          </div>
+        </div>
+        <button class="sign-out-button" onclick="signOut()">Sign Out</button>
+      </div>
+
+      <!-- Configuration Section -->
+      <div class="config-section panel hidden" id="configSection">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;">
+          <div>
+            <h2>Configuration</h2>
+            <p class="lead">Choose your organization and projects to keep an eye on.</p>
+          </div>
+          <button class="collapse-toggle" id="configCollapseToggle" onclick="toggleConfigCollapse()" aria-expanded="true" aria-controls="configBody">
+            <span class="chevron">⌄</span>
+            <span class="collapse-label">Collapse</span>
+          </button>
+        </div>
+
+        <div id="configBody" class="collapsible-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="organization">Azure DevOps Organization</label>
+              <input type="text" id="organization" placeholder="e.g., contoso" />
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <button onclick="loadProjects()" id="loadProjectsBtn">Load Projects</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Select Projects to Monitor</label>
+            <div id="projectSelection" class="project-selection"></div>
+            <div id="projectPagination" class="pagination"></div>
+          </div>
+
+          <button onclick="fetchPullRequests()" id="fetchPRBtn">
+            Fetch Pull Requests
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls Section -->
+      <div class="controls hidden" id="controlsSection">
+        <div class="checkbox-group">
+          <input type="checkbox" id="hideDrafts" onchange="filterPullRequests()">
+          <label for="hideDrafts" style="margin: 0;">Hide Draft PRs</label>
+        </div>
+
+        <select id="autoRefresh" onchange="updateAutoRefresh()" aria-label="Auto refresh cadence">
+          <option value="0">No Auto-Refresh</option>
+          <option value="60000">Refresh every 1 minute</option>
+          <option value="300000">Refresh every 5 minutes</option>
+          <option value="600000">Refresh every 10 minutes</option>
+          <option value="1800000">Refresh every 30 minutes</option>
+        </select>
+
+        <div class="status-info">
+          <span id="prCount">0 pull requests</span>
+          <span id="lastRefreshed">Never refreshed</span>
+          <span id="nextRefresh" style="display: none;"></span>
+        </div>
+      </div>
+
+      <!-- Pull Requests List -->
+      <div id="prList" class="pr-list pr-grid"></div>
+    </div>
+  </main>
 
   <script>
-    /********************************************
-     * THEME TOGGLE
-     ********************************************/
-    function toggleTheme() {
-      const body = document.body;
-      if (body.classList.contains('light-mode')) {
-        body.classList.remove('light-mode');
-        body.classList.add('dark-mode');
-      } else {
-        body.classList.remove('dark-mode');
-        body.classList.add('light-mode');
-      }
-    }
-
-    let authHeader = '';
-    let allProjects = [];
-    let projectSelectorOpen = false;
-
-    // We'll track which projects are "selected" in a Set.
-    // We'll store them by project name in a Set.
-    const selectedProjects = new Set();
-
-    // Auto-refresh variables
-    let autoRefreshEnabled = false;
-    let refreshTimer = null;
-    let lastRefreshTime = null;
-
-    /********************************************
-     * SMART PROJECT SELECTOR FUNCTIONS
-     ********************************************/
-
-    // Toggle the project selector dropdown
-    function toggleProjectSelector() {
-      const dropdown = document.getElementById('projectSelectorDropdown');
-      const arrow = document.getElementById('projectSelectorArrow');
-      const trigger = document.querySelector('.project-selector-trigger');
-
-      projectSelectorOpen = !projectSelectorOpen;
-
-      if (projectSelectorOpen) {
-        dropdown.classList.add('open');
-        arrow.classList.add('open');
-        trigger.classList.add('active');
-        document.getElementById('projectSearchInput').focus();
-        // Add click outside listener
-        setTimeout(() => document.addEventListener('click', handleClickOutside), 0);
-      } else {
-        dropdown.classList.remove('open');
-        arrow.classList.remove('open');
-        trigger.classList.remove('active');
-        document.removeEventListener('click', handleClickOutside);
-      }
-
-      updateAriaAttributes();
-      updateAriaAttributes();
-    }
-
-    // Handle clicks outside the dropdown to close it
-    function handleClickOutside(event) {
-      const widget = document.getElementById('projectSelectorWidget');
-      if (!widget.contains(event.target)) {
-        closeProjectSelector();
-      }
-    }
-
-    // Close the project selector
-    function closeProjectSelector() {
-      if (projectSelectorOpen) {
-        const dropdown = document.getElementById('projectSelectorDropdown');
-        const arrow = document.getElementById('projectSelectorArrow');
-        const trigger = document.querySelector('.project-selector-trigger');
-
-        dropdown.classList.remove('open');
-        arrow.classList.remove('open');
-        trigger.classList.remove('active');
-        projectSelectorOpen = false;
-        document.removeEventListener('click', handleClickOutside);
-        updateAriaAttributes();
-        updateAriaAttributes();
-      }
-    }
-
-    // Filter project options in the dropdown
-    function filterProjectOptions(searchTerm) {
-      searchTerm = searchTerm.toLowerCase();
-      const options = document.querySelectorAll('.project-option');
-
-      let visibleCount = 0;
-      options.forEach(option => {
-        const projectName = option.querySelector('.project-option-name').textContent.toLowerCase();
-        if (projectName.includes(searchTerm)) {
-          option.style.display = '';
-          visibleCount++;
-        } else {
-          option.style.display = 'none';
-        }
-      });
-
-      return visibleCount;
-    }
-
-    // Toggle project selection
-    function toggleProjectSelection(projectName, checkbox) {
-      if (checkbox.checked) {
-        selectedProjects.add(projectName);
-        updateRecentProjects(projectName);
-      } else {
-        selectedProjects.delete(projectName);
-      }
-
-      updateProjectSelectorDisplay();
-      updateSelectedProjectsPills();
-      saveSelectedProjects();
-    }
-
-    // Toggle project selection when clicking on the option text/div (not checkbox)
-    function toggleProjectSelectionFromOption(projectName) {
-      const checkbox = document.querySelector(`input[value="${projectName}"]`);
-      if (checkbox) {
-        // Toggle the checkbox state
-        checkbox.checked = !checkbox.checked;
-        // Call the original toggle function
-        toggleProjectSelection(projectName, checkbox);
-      }
-    }
-
-    // Remove project from selection (used by pill remove buttons)
-    function removeProjectSelection(projectName) {
-      selectedProjects.delete(projectName);
-
-      // Update the checkbox in the dropdown
-      const checkbox = document.querySelector(`input[value="${projectName}"]`);
-      if (checkbox) {
-        checkbox.checked = false;
-      }
-
-      updateProjectSelectorDisplay();
-      updateSelectedProjectsPills();
-      saveSelectedProjects();
-    }
-
-    // Update the project selector trigger text
-    function updateProjectSelectorDisplay() {
-      const text = document.getElementById('projectSelectorText');
-      const count = selectedProjects.size;
-
-      if (count === 0) {
-        text.textContent = 'Select projects...';
-      } else if (count === 1) {
-        text.textContent = Array.from(selectedProjects)[0];
-      } else {
-        text.textContent = `${count} projects selected`;
-      }
-    }    // Update the selected projects pills display
-    function updateSelectedProjectsPills() {
-      const pillsContainer = document.getElementById('selectedProjectsPills');
-      const fetchPrsBtn = document.getElementById('fetchPrsBtn');
-      const autoRefreshControls = document.getElementById('autoRefreshControls');
-      const noProjectsMessage = document.getElementById('noProjectsMessage');
-      const mainContent = document.querySelector('.main-content');
-      const projects = Array.from(selectedProjects);
-
-      if (projects.length === 0) {
-        // Hide pills container - use inline style to override existing inline styles
-        pillsContainer.classList.add('hidden');
-        pillsContainer.style.display = 'none';
-        pillsContainer.innerHTML = '';
-        
-        // Hide main content elements when no projects are selected
-        fetchPrsBtn.classList.add('hidden');
-        autoRefreshControls.classList.add('hidden');
-        mainContent.classList.add('hidden');
-        
-        // Show the no projects message
-        noProjectsMessage.classList.remove('hidden');
-        
-        return;
-      }
-
-      // Show elements when projects are selected
-      pillsContainer.classList.remove('hidden');
-      pillsContainer.style.display = 'block'; // Override the display none when showing
-      fetchPrsBtn.classList.remove('hidden');
-      autoRefreshControls.classList.remove('hidden');
-      mainContent.classList.remove('hidden');
-      
-      // Hide the no projects message
-      noProjectsMessage.classList.add('hidden');
-      
-      pillsContainer.innerHTML = projects.map(project => `
-        <div class="project-pill">
-          ${project}
-          <button class="project-pill-remove" onclick="removeProjectSelection('${project}')" title="Remove ${project}">×</button>
-        </div>
-      `).join('');
-    }
-
-    // Update recent projects list
-    function updateRecentProjects(projectName) {
-      let recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-
-      // Remove if already exists
-      recentProjects = recentProjects.filter(p => p !== projectName);
-
-      // Add to beginning
-      recentProjects.unshift(projectName);
-
-      // Keep only last 5
-      recentProjects = recentProjects.slice(0, 5);
-
-      localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
-    }
-
-    // Render project options in the dropdown
-    function renderProjectOptions(projects) {
-      const container = document.getElementById('projectOptions');
-      const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-
-      // Sort projects: recent first, then alphabetically
-      const sortedProjects = projects.slice().sort((a, b) => {
-        const aIsRecent = recentProjects.includes(a.name);
-        const bIsRecent = recentProjects.includes(b.name);
-
-        if (aIsRecent && !bIsRecent) return -1;
-        if (!aIsRecent && bIsRecent) return 1;
-
-        return a.name.localeCompare(b.name);
-      });
-
-      container.innerHTML = sortedProjects.map(project => {
-        const isRecent = recentProjects.includes(project.name);
-        const isSelected = selectedProjects.has(project.name);
-
-        return `
-          <div class="project-option ${isSelected ? 'selected' : ''} ${isRecent ? 'recent' : ''}"
-               onclick="toggleProjectSelectionFromOption('${project.name}')">
-            <input type="checkbox"
-                   class="project-option-checkbox"
-                   value="${project.name}"
-                   ${isSelected ? 'checked' : ''}
-                   onchange="toggleProjectSelection('${project.name}', this)"
-                   onclick="event.stopPropagation()">
-            <span class="project-option-name">${project.name}</span>
-            ${isRecent ? '<span class="project-option-recent-badge">Recent</span>' : ''}
-          </div>
-        `;
-      }).join('');
-
-      // Add quick action buttons at the top of the dropdown
-      if (sortedProjects.length > 0) {
-        const quickActions = document.createElement('div');
-        quickActions.className = 'project-quick-actions';
-        quickActions.innerHTML = `
-          <div class="quick-actions-header">Quick Actions:</div>
-          <button type="button" onclick="selectAllProjects()" class="quick-action-btn">Select All</button>
-          <button type="button" onclick="clearAllProjects()" class="quick-action-btn">Clear All</button>
-          ${recentProjects.length > 0 ? '<button type="button" onclick="selectRecentProjects()" class="quick-action-btn">Recent Only</button>' : ''}
-        `;
-        container.insertBefore(quickActions, container.firstChild);
-      }
-    }
-
-    // Handle keyboard navigation for project selector
-    function handleProjectSelectorKeydown(event) {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        toggleProjectSelector();
-      } else if (event.key === 'Escape') {
-        closeProjectSelector();
-      }
-    }
-
-    // Handle keyboard navigation in search input
-    function handleSearchKeydown(event) {
-      if (event.key === 'Escape') {
-        closeProjectSelector();
-      } else if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        focusFirstVisibleOption();
-      }
-    }
-
-    // Focus the first visible project option
-    function focusFirstVisibleOption() {
-      const visibleOptions = document.querySelectorAll('.project-option:not([style*="display: none"])');
-      if (visibleOptions.length > 0) {
-        visibleOptions[0].focus();
-      }
-    }
-
-    // Update aria attributes when opening/closing dropdown
-    function updateAriaAttributes() {
-      const trigger = document.querySelector('.project-selector-trigger');
-      trigger.setAttribute('aria-expanded', projectSelectorOpen.toString());
-    }
-
-    // Quick action buttons for project selection
-    function selectAllProjects() {
-      allProjects.forEach(project => {
-        selectedProjects.add(project.name);
-        updateRecentProjects(project.name);
-      });
-
-      // Update all checkboxes
-      document.querySelectorAll('.project-option-checkbox').forEach(checkbox => {
-        checkbox.checked = true;
-        checkbox.closest('.project-option').classList.add('selected');
-      });
-
-      updateProjectSelectorDisplay();
-      updateSelectedProjectsPills();
-      saveSelectedProjects();
-    }
-
-    function clearAllProjects() {
-      selectedProjects.clear();
-
-      // Update all checkboxes
-      document.querySelectorAll('.project-option-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-        checkbox.closest('.project-option').classList.remove('selected');
-      });
-
-      updateProjectSelectorDisplay();
-      updateSelectedProjectsPills();
-      saveSelectedProjects();
-    }
-
-    // Quick select recent projects
-    function selectRecentProjects() {
-      const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '[]');
-
-      recentProjects.forEach(projectName => {
-        if (allProjects.some(p => p.name === projectName)) {
-          selectedProjects.add(projectName);
-
-          // Update checkbox if visible
-          const checkbox = document.querySelector(`input[value="${projectName}"]`);
-          if (checkbox) {
-            checkbox.checked = true;
-            checkbox.closest('.project-option').classList.add('selected');
-          }
-        }
-      });
-
-      updateProjectSelectorDisplay();
-      updateSelectedProjectsPills();
-      saveSelectedProjects();
-    }
-
-    /********************************************
-     * FETCH PROJECTS
-     ********************************************/
-    async function connectAndFetchProjects() {
-      const organization = document.getElementById('organization').value.trim();
-      const pat = document.getElementById('pat').value.trim();
-      const projectSelectorWidget = document.getElementById('projectSelectorWidget');
-      const fetchPrsBtn = document.getElementById('fetchPrsBtn');
-      const resultsDiv = document.getElementById('results');
-
-      // Display loading message
-      resultsDiv.innerHTML = '<p>Connecting to Azure DevOps and loading projects...</p>';
-
-      // Clear previous state
-      allProjects = [];
-      selectedProjects.clear(); // Reset selection
-
-      if (!organization || !pat) {
-        resultsDiv.innerHTML = '<p>Please provide both organization and PAT.</p>';
-        return;
-      }
-
-      // Convert PAT to Base64 for Basic Auth
-      authHeader = 'Basic ' + btoa(':' + pat);
-
-      // Updated API URL with top parameter to ensure we get all projects
-      const url = `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1&$top=1000`;
-
-      try {
-        console.log(`Fetching projects from: ${url}`);
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Authorization': authHeader,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        console.log('Response status:', response.status);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error response:', errorText);
-          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('Projects data received:', data);
-
-        allProjects = data.value || [];
-        console.log(`Found ${allProjects.length} projects`);
-
-        if (allProjects.length > 0) {
-          // Show project selector widget
-          projectSelectorWidget.classList.remove('hidden');
-          fetchPrsBtn.classList.remove('hidden');
-          // Show auto-refresh controls
-          document.getElementById('autoRefreshControls').classList.remove('hidden');
-
-          // Load saved project selections
-          loadSavedProjectSelections();
-
-          // Render project options in the dropdown
-          renderProjectOptions(allProjects);
-
-          // Update display
-          updateProjectSelectorDisplay();
-          updateSelectedProjectsPills();
-
-          resultsDiv.innerHTML = `<p>Successfully loaded ${allProjects.length} projects. Select projects using the dropdown above to monitor their pull requests.</p>`;
-        } else {
-          resultsDiv.innerHTML = '<p>No projects found or you do not have access. Please check your organization name and PAT permissions.</p>';
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        resultsDiv.innerHTML = `<p>Error fetching projects: ${error.message}</p>
-                               <p>Please check:</p>
-                               <ul>
-                                 <li>Your organization name is correct</li>
-                                 <li>Your PAT has sufficient permissions (needs <code>Read</code> access for <code>Project and Team</code>)</li>
-                                 <li>Your PAT has not expired</li>
-                               </ul>`;
-      }
-    }
-
-    // Load saved project selections from localStorage
-    function loadSavedProjectSelections() {
-      const savedProjectsString = localStorage.getItem('selectedProjects');
-      if (savedProjectsString) {
-        const savedProjects = JSON.parse(savedProjectsString);
-        savedProjects.forEach(project => selectedProjects.add(project));
-      }
-    }
-
-    /********************************************
-     * AUTO-REFRESH FUNCTIONS
-     ********************************************/
-
-    // Toggle auto-refresh on/off
-    function toggleAutoRefresh() {
-      const checkbox = document.getElementById('autoRefreshToggle');
-      const lastRefreshedSpan = document.getElementById('lastRefreshed');
-      const countdownTimer = document.getElementById('countdownTimer');
-
-      autoRefreshEnabled = checkbox.checked;
-
-      if (autoRefreshEnabled) {
-        // Start the timer
-        startRefreshTimer();
-        lastRefreshedSpan.classList.remove('hidden');
-        countdownTimer.classList.remove('hidden');
-      } else {
-        // Stop the timer
-        stopRefreshTimer();
-        lastRefreshedSpan.classList.add('hidden');
-        countdownTimer.classList.add('hidden');
-      }
-    }
-
-    // Update the refresh interval when selection changes
-    function updateRefreshInterval() {
-      if (autoRefreshEnabled) {
-        // Restart timer with new interval
-        stopRefreshTimer();
-        startRefreshTimer();
-      }
-    }
-
-    // Countdown variables
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const CONFIG = {
+      clientId: '<CLIENT ID>', // Replace with your Client ID from Entra ID
+      redirectUri: 'http://localhost:8000',
+      authority: 'https://login.microsoftonline.com/<TENANT ID>',
+      scopes: ['499b84ac-1321-427f-aa17-267ca6975798/.default'],
+      azureDevOpsResourceId: '499b84ac-1321-427f-aa17-267ca6975798'
+    };
+
+    // Runtime values derived from the static config
+    const RUNTIME = {
+      redirectUri: CONFIG.redirectUri || window.location.origin
+    };
+
+    // Projects pagination state
+    const PROJECTS_PAGE_SIZE = 9;
+    let loadedProjects = [];
+    let currentProjectPage = 1;
+    let selectedProjectsSet = new Set(JSON.parse(localStorage.getItem('selectedProjects') || '[]'));
+
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    let allPullRequests = [];
+    let autoRefreshInterval = null;
     let countdownInterval = null;
     let nextRefreshTime = null;
 
-    // Start the refresh timer
-    function startRefreshTimer() {
-      const interval = parseInt(document.getElementById('refreshInterval').value);
+    // ============================================
+    // OAUTH & PKCE FUNCTIONS
+    // ============================================
 
-      // Clear any existing timer
-      stopRefreshTimer();
-
-      // Calculate next refresh time
-      nextRefreshTime = new Date(Date.now() + interval);
-
-      // Start countdown display
-      startCountdown(interval);
-
-      // Set the new timer
-      refreshTimer = setInterval(() => {
-        fetchPullRequests();
-        updateLastRefreshedTime();
-        // Reset the countdown after each refresh
-        nextRefreshTime = new Date(Date.now() + interval);
-      }, interval);
-
-      // Initial refresh
-      fetchPullRequests();
-      updateLastRefreshedTime();
+    /**
+     * Generate random string for code verifier
+     */
+    function generateRandomString(length) {
+      const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+      let text = '';
+      for (let i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      return text;
     }
 
-    // Stop the refresh timer
-    function stopRefreshTimer() {
-      if (refreshTimer) {
-        clearInterval(refreshTimer);
-        refreshTimer = null;
+    /**
+     * Generate SHA-256 hash and convert to base64url
+     */
+    async function sha256(plain) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plain);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return hash;
+    }
+
+    function base64urlencode(arrayBuffer) {
+      let str = '';
+      const bytes = new Uint8Array(arrayBuffer);
+      const len = bytes.byteLength;
+      for (let i = 0; i < len; i++) {
+        str += String.fromCharCode(bytes[i]);
+      }
+      return btoa(str)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    }
+
+    /**
+     * Generate PKCE code verifier and challenge
+     */
+    async function generatePKCECodes() {
+      const codeVerifier = generateRandomString(128);
+      const hashed = await sha256(codeVerifier);
+      const codeChallenge = base64urlencode(hashed);
+      return { codeVerifier, codeChallenge };
+    }
+
+    /**
+     * Validate that the app is running from the same origin as the redirect URI
+     * This prevents PKCE values from being lost due to origin mismatches.
+     */
+    function validateEnvironment() {
+      if (window.location.protocol === 'file:') {
+        showAuthError('OAuth requires an HTTP origin. Please start a local server (e.g., python -m http.server 8000) and open http://localhost:8000.');
+        return false;
       }
 
-      // Also stop the countdown
+      let redirectOrigin = '';
+      try {
+        redirectOrigin = new URL(RUNTIME.redirectUri).origin;
+      } catch (error) {
+        console.error('Invalid redirectUri in configuration:', error);
+        showAuthError('Invalid redirectUri configured. Please check CONFIG.redirectUri.');
+        return false;
+      }
+
+      const currentOrigin = window.location.origin;
+      if (redirectOrigin !== currentOrigin) {
+        showAuthError(`Redirect URI mismatch. App is loaded from ${currentOrigin} but redirectUri is set to ${redirectOrigin}. Open the app on the configured origin or update CONFIG.redirectUri and the Entra app registration to match.`);
+        return false;
+      }
+
+      return true;
+    }
+
+    /**
+     * Remove OAuth query parameters from the URL
+     */
+    function clearAuthQueryParams() {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    /**
+     * Initiate OAuth sign-in flow
+     */
+    async function signIn() {
+      try {
+        const signInButton = document.getElementById('signInButton');
+        const authLoading = document.getElementById('authLoading');
+        signInButton.disabled = true;
+        authLoading.style.display = 'block';
+
+        if (!validateEnvironment()) {
+          signInButton.disabled = false;
+          authLoading.style.display = 'none';
+          return;
+        }
+
+        // Generate PKCE codes
+        const { codeVerifier, codeChallenge } = await generatePKCECodes();
+
+        // Generate state for CSRF protection
+        const state = generateRandomString(32);
+
+        // FIXED: Store in localStorage instead of sessionStorage
+        // This ensures the values persist through the OAuth redirect
+        localStorage.setItem('pkce_code_verifier', codeVerifier);
+        localStorage.setItem('oauth_state', state);
+
+        // Build authorization URL
+        const authUrl = new URL(`${CONFIG.authority}/oauth2/v2.0/authorize`);
+        authUrl.searchParams.append('client_id', CONFIG.clientId);
+        authUrl.searchParams.append('response_type', 'code');
+        authUrl.searchParams.append('redirect_uri', RUNTIME.redirectUri);
+        authUrl.searchParams.append('scope', CONFIG.scopes.join(' '));
+        authUrl.searchParams.append('state', state);
+        authUrl.searchParams.append('code_challenge', codeChallenge);
+        authUrl.searchParams.append('code_challenge_method', 'S256');
+        authUrl.searchParams.append('response_mode', 'query');
+
+        // Redirect to Microsoft login
+        window.location.href = authUrl.toString();
+      } catch (error) {
+        console.error('Sign-in error:', error);
+        showAuthError('Failed to initiate sign-in: ' + error.message);
+        document.getElementById('signInButton').disabled = false;
+        document.getElementById('authLoading').style.display = 'none';
+      }
+    }
+
+    /**
+     * Handle OAuth callback
+     */
+    async function handleOAuthCallback() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      const error = params.get('error');
+      const errorDescription = params.get('error_description');
+
+      // Not a callback, normal page load
+      if (!code && !error) {
+        return;
+      }
+
+      // Check for errors returned from the identity provider
+      if (error) {
+        showAuthError(`Authentication failed: ${error} - ${errorDescription || 'Unknown error'}`);
+        clearOAuthState();
+        clearAuthQueryParams();
+        return;
+      }
+
+      if (!validateEnvironment()) {
+        clearAuthQueryParams();
+        return;
+      }
+
+      document.getElementById('authLoading').style.display = 'block';
+
+      try {
+        // FIXED: Validate state from localStorage
+        const storedState = localStorage.getItem('oauth_state');
+        if (state !== storedState) {
+          throw new Error('State mismatch - possible CSRF attack');
+        }
+
+        // FIXED: Get code verifier from localStorage
+        const codeVerifier = localStorage.getItem('pkce_code_verifier');
+        if (!codeVerifier) {
+          throw new Error('Code verifier not found');
+        }
+
+        // Exchange code for token
+        await exchangeCodeForToken(code, codeVerifier);
+
+        // Clear OAuth state
+        clearOAuthState();
+
+        // Show authenticated UI
+        await initializeAuthenticatedApp();
+
+      } catch (error) {
+        console.error('OAuth callback error:', error);
+        showAuthError('Authentication failed: ' + error.message);
+        clearOAuthState();
+      } finally {
+        clearAuthQueryParams();
+        document.getElementById('authLoading').style.display = 'none';
+      }
+    }
+
+    /**
+     * Exchange authorization code for access token
+     */
+    async function exchangeCodeForToken(code, codeVerifier) {
+      const tokenUrl = `${CONFIG.authority}/oauth2/v2.0/token`;
+
+      const body = new URLSearchParams({
+        client_id: CONFIG.clientId,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: RUNTIME.redirectUri,
+        code_verifier: codeVerifier,
+        scope: CONFIG.scopes.join(' ')
+      });
+
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error_description || 'Token exchange failed');
+      }
+
+      const tokens = await response.json();
+
+      // Store tokens in sessionStorage (these can stay in sessionStorage)
+      sessionStorage.setItem('access_token', tokens.access_token);
+      sessionStorage.setItem('refresh_token', tokens.refresh_token);
+      sessionStorage.setItem('token_expires_at', Date.now() + (tokens.expires_in * 1000));
+
+      // Optionally decode token to get user info
+      const userInfo = parseJwt(tokens.access_token);
+      sessionStorage.setItem('user_info', JSON.stringify(userInfo));
+    }
+
+    /**
+     * Refresh access token using refresh token
+     */
+    async function refreshAccessToken() {
+      const refreshToken = sessionStorage.getItem('refresh_token');
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const tokenUrl = `${CONFIG.authority}/oauth2/v2.0/token`;
+
+      const body = new URLSearchParams({
+        client_id: CONFIG.clientId,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        scope: CONFIG.scopes.join(' ')
+      });
+
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      });
+
+      if (!response.ok) {
+        // Refresh failed, need to re-authenticate
+        throw new Error('Token refresh failed');
+      }
+
+      const tokens = await response.json();
+
+      // Update stored tokens
+      sessionStorage.setItem('access_token', tokens.access_token);
+      if (tokens.refresh_token) {
+        sessionStorage.setItem('refresh_token', tokens.refresh_token);
+      }
+      sessionStorage.setItem('token_expires_at', Date.now() + (tokens.expires_in * 1000));
+    }
+
+    /**
+     * Validate token and refresh if needed
+     */
+    async function validateAndRefreshToken() {
+      const expiresAt = parseInt(sessionStorage.getItem('token_expires_at') || '0');
+      const now = Date.now();
+
+      // Refresh if token expires in less than 5 minutes
+      if (expiresAt - now < 300000) {
+        try {
+          await refreshAccessToken();
+          return true;
+        } catch (error) {
+          console.error('Token refresh failed:', error);
+          // Force re-authentication
+          signOut();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * Get valid access token
+     */
+    async function getAccessToken() {
+      await validateAndRefreshToken();
+      return sessionStorage.getItem('access_token');
+    }
+
+    /**
+     * Sign out and clear tokens
+     */
+    function signOut() {
+      // Clear tokens from sessionStorage
+      sessionStorage.removeItem('access_token');
+      sessionStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('token_expires_at');
+      sessionStorage.removeItem('user_info');
+
+      // Clear OAuth state from localStorage
+      clearOAuthState();
+
+      // Clear auto-refresh
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
       if (countdownInterval) {
         clearInterval(countdownInterval);
         countdownInterval = null;
       }
+
+      // Reset UI
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('userInfo').classList.add('hidden');
+      document.getElementById('configSection').classList.add('hidden');
+      document.getElementById('controlsSection').classList.add('hidden');
+      document.getElementById('prList').innerHTML = '';
+      document.getElementById('authError').style.display = 'none';
+
+      // Reset state
+      allPullRequests = [];
     }
 
-    // Start the countdown display
-    function startCountdown(totalMs) {
-      const countdownEl = document.getElementById('countdownTimer');
-
-      // Clear any existing countdown
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-      }
-
-      // Update countdown immediately
-      updateCountdownDisplay();
-
-      // Update countdown every second
-      countdownInterval = setInterval(() => {
-        updateCountdownDisplay();
-      }, 1000);
+    /**
+     * FIXED: Clear OAuth state from localStorage
+     */
+    function clearOAuthState() {
+      localStorage.removeItem('pkce_code_verifier');
+      localStorage.removeItem('oauth_state');
     }
 
-    // Update the countdown display
-    function updateCountdownDisplay() {
-      const countdownEl = document.getElementById('countdownTimer');
-
-      if (!nextRefreshTime) {
-        countdownEl.textContent = 'Next refresh: waiting...';
-        return;
-      }
-
-      const now = new Date();
-      const timeRemaining = nextRefreshTime - now;
-
-      if (timeRemaining <= 0) {
-        countdownEl.textContent = 'Refreshing now...';
-        return;
-      }
-
-      // Format the time remaining
-      const minutes = Math.floor(timeRemaining / 60000);
-      const seconds = Math.floor((timeRemaining % 60000) / 1000);
-
-      // Display with leading zeros for seconds
-      const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-      countdownEl.textContent = `Next refresh in: ${formattedTime}`;
+    /**
+     * Show authentication error
+     */
+    function showAuthError(message) {
+      const errorDiv = document.getElementById('authError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
     }
 
-    // Update the last refreshed time indicator
-    function updateLastRefreshedTime() {
-      const lastRefreshedSpan = document.getElementById('lastRefreshed');
-      lastRefreshTime = new Date();
-
-      const timeString = lastRefreshTime.toLocaleTimeString();
-      lastRefreshedSpan.textContent = `Last refreshed: ${timeString}`;
+    /**
+     * Parse JWT token (basic decoding)
+     */
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (error) {
+        console.error('Error parsing JWT:', error);
+        return {};
+      }
     }
 
-    /********************************************
-     * FETCH & DISPLAY ALL PULL REQUESTS COMBINED
-     ********************************************/
-    async function fetchPullRequests() {
-      const organization = document.getElementById('organization').value.trim();
-      const resultsDiv = document.getElementById('results');
-      const hideDraftPRs = document.getElementById('hideDraftPRs').checked;
+    /**
+     * Initialize authenticated app
+     */
+    async function initializeAuthenticatedApp() {
+      // Hide auth section
+      document.getElementById('authSection').classList.add('hidden');
 
-      resultsDiv.innerHTML = '';
-
-      // The user might have selected multiple pages, so read from our global set
-      const checkedProjects = Array.from(selectedProjects);
-
-      if (!organization || !authHeader || checkedProjects.length === 0) {
-        resultsDiv.innerHTML = '<p>Please connect and select at least one project.</p>';
-        return;
+      // Show user info
+      const userInfoStr = sessionStorage.getItem('user_info');
+      if (userInfoStr) {
+        const userInfo = JSON.parse(userInfoStr);
+        displayUserInfo(userInfo);
       }
 
-      // We'll store all PRs from all selected projects in a single array
-      const allPRs = [];
+      // Show config section
+      document.getElementById('configSection').classList.remove('hidden');
+      document.getElementById('controlsSection').classList.remove('hidden');
 
-      // Fetch PRs per project
-      for (const projectName of checkedProjects) {
-        const url = `https://dev.azure.com/${organization}/${projectName}/_apis/git/pullrequests?api-version=7.1`;
+      // Load saved preferences
+      loadPreferences();
+    }
 
-        try {
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Authorization': authHeader,
-              'Content-Type': 'application/json'
-            }
-          });
+    /**
+     * Display user information
+     */
+    function displayUserInfo(userInfo) {
+      const userInfoDiv = document.getElementById('userInfo');
+      const userName = userInfo.name || userInfo.preferred_username || 'User';
+      const userEmail = userInfo.preferred_username || userInfo.upn || '';
 
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
+      document.getElementById('userName').textContent = userName;
+      document.getElementById('userEmail').textContent = userEmail;
 
-          const data = await response.json();
-          const prList = data.value;
+      // Set avatar initials
+      const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
 
-          if (prList && prList.length > 0) {
-            // Append each PR to the combined array, but also store the project name
-            prList.forEach(pr => {
-              pr.projectName = projectName; // Add project name so we can display it
-              allPRs.push(pr);
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching PRs:', error);
-          const errMsg = document.createElement('p');
-          errMsg.textContent = `Error fetching PRs for project: ${projectName} - ${error.message}`;
-          resultsDiv.appendChild(errMsg);
+      userInfoDiv.classList.remove('hidden');
+    }
+
+    // ============================================
+    // AZURE DEVOPS API FUNCTIONS
+    // ============================================
+
+    /**
+     * Call Azure DevOps API with authentication
+     */
+    async function callAzureDevOpsAPI(url) {
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      }
-
-      // Once we've fetched all, let's display them in a single table
-      if (allPRs.length === 0) {
-        // If no PRs across all selected projects
-        const noPrsMsg = document.createElement('p');
-        noPrsMsg.textContent = "That's it, there is no review work left!";
-        noPrsMsg.classList.add('empty-state-message');
-        resultsDiv.appendChild(noPrsMsg);
-        return;
-      }
-
-      const heading = document.createElement('h2');
-      heading.textContent = 'Open Pull Requests';
-      resultsDiv.appendChild(heading);
-
-      // Create a table for all PRs
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      thead.innerHTML = `
-        <tr>
-          <th>Project</th>
-          <th>Pull Request</th>
-          <th>Repository</th>
-          <th>Source Branch</th>
-          <th>Target Branch</th>
-          <th>Age</th>
-          <th>Opened By</th>
-        </tr>
-      `;
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      allPRs.forEach(pr => {
-        if (hideDraftPRs && pr.isDraft) {
-          return; // Skip draft PRs if the filter is enabled
-        }
-
-        const sourceBranch = pr.sourceRefName.replace('refs/heads/', '');
-        const targetBranch = pr.targetRefName.replace('refs/heads/', '');
-
-        const tr = document.createElement('tr');
-
-        // Project
-        const projectCell = document.createElement('td');
-        projectCell.textContent = pr.projectName;
-        tr.appendChild(projectCell);
-
-        // Pull Request (Link)
-        const prCell = document.createElement('td');
-        const prLink = document.createElement('a');
-        prLink.textContent = `${pr.title} (#${pr.pullRequestId})`;
-        prLink.href = `https://dev.azure.com/${organization}/${pr.projectName}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`;
-        prLink.target = '_blank';
-        prCell.appendChild(prLink);
-        tr.appendChild(prCell);
-
-        // Repository
-        const repoCell = document.createElement('td');
-        repoCell.textContent = pr.repository.name;
-        tr.appendChild(repoCell);
-
-        // Source Branch
-        const sourceCell = document.createElement('td');
-        sourceCell.textContent = sourceBranch;
-        tr.appendChild(sourceCell);
-
-        // Target Branch
-        const targetCell = document.createElement('td');
-        targetCell.textContent = targetBranch;
-        tr.appendChild(targetCell);
-
-        // Age (in days)
-        const ageCell = document.createElement('td');
-        const createdDate = new Date(pr.creationDate);
-        const now = new Date();
-        const daysOld = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
-
-        const ageSpan = document.createElement('span');
-        ageSpan.textContent = `${daysOld} days`;
-
-        // Apply styling based on age
-        if (daysOld > 7) {
-          ageSpan.className = 'pr-age-critical';
-        } else if (daysOld > 3) {
-          ageSpan.className = 'pr-age-warning';
-        } else {
-          ageSpan.className = 'pr-age-normal';
-        }
-
-        ageCell.appendChild(ageSpan);
-        tr.appendChild(ageCell);
-
-        // Opened By
-        const openedByCell = document.createElement('td');
-        openedByCell.textContent = pr.createdBy?.displayName || 'Unknown';
-        tr.appendChild(openedByCell);
-
-        tbody.appendChild(tr);
       });
 
-      table.appendChild(tbody);
-      resultsDiv.appendChild(table);
-    }
+      if (response.status === 401) {
+        // Token might be invalid, try to refresh
+        await validateAndRefreshToken();
+        const newToken = await getAccessToken();
 
-    function hideDraftPRsChanged() {
-      // Save preference to localStorage
-      localStorage.setItem('hideDraftPRs', document.getElementById('hideDraftPRs').checked);
-      fetchPullRequests();
-    }
+        // Retry request
+        const retryResponse = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${newToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-    // Load user preferences from localStorage
-    function loadUserPreferences() {
-      // Load organization name
-      const savedOrganization = localStorage.getItem('organization');
-      if (savedOrganization) {
-        document.getElementById('organization').value = savedOrganization;
+        if (!retryResponse.ok) {
+          throw new Error(`API call failed: ${retryResponse.status}`);
+        }
+        return retryResponse;
       }
 
-      // Load "hide draft PRs" preference
-      const hideDraftPRsValue = localStorage.getItem('hideDraftPRs');
-      if (hideDraftPRsValue !== null) {
-        document.getElementById('hideDraftPRs').checked = hideDraftPRsValue === 'true';
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`);
       }
 
-      // Load selected projects
-      const savedProjectsString = localStorage.getItem('selectedProjects');
-      if (savedProjectsString) {
-        const savedProjects = JSON.parse(savedProjectsString);
-        // We'll populate the selectedProjects set when projects are loaded
-        savedProjects.forEach(project => selectedProjects.add(project));
-      }
+      return response;
     }
 
-    // Save selected projects to localStorage
-    function saveSelectedProjects() {
-      localStorage.setItem('selectedProjects', JSON.stringify(Array.from(selectedProjects)));
-    }
-
-    // Save organization name to localStorage
-    function saveOrganization() {
+    /**
+     * Load projects from Azure DevOps
+     */
+    async function loadProjects() {
       const organization = document.getElementById('organization').value.trim();
-      localStorage.setItem('organization', organization);
-    }
+      if (!organization) {
+        alert('Please enter your organization name');
+        return;
+      }
 
-    // Load preferences on page load
-    document.addEventListener('DOMContentLoaded', loadUserPreferences);
+      const loadBtn = document.getElementById('loadProjectsBtn');
+      loadBtn.disabled = true;
+      loadBtn.textContent = 'Loading...';
 
-    // Save organization name when it changes
-    document.addEventListener('DOMContentLoaded', function () {
-      const organizationInput = document.getElementById('organization');
-      organizationInput.addEventListener('input', saveOrganization);
-      organizationInput.addEventListener('blur', saveOrganization);
+      try {
+        const response = await callAzureDevOpsAPI(
+          `https://dev.azure.com/${organization}/_apis/projects?api-version=7.1`
+        );
+        const data = await response.json();
 
-      // Initialize UI state - ensure proper elements are hidden on load
-      initializeUIState();
-    });    // Initialize UI state on page load
-    function initializeUIState() {
-      // Elements start hidden by default in HTML, just ensure no projects message is shown
-      if (selectedProjects.size === 0) {
-        const noProjectsMessage = document.getElementById('noProjectsMessage');
-        noProjectsMessage.classList.remove('hidden');
+        displayProjects(data.value);
+
+        // Save organization
+        localStorage.setItem('organization', organization);
+      } catch (error) {
+        console.error('Error loading projects:', error);
+        alert('Failed to load projects: ' + error.message);
+      } finally {
+        loadBtn.disabled = false;
+        loadBtn.textContent = 'Load Projects';
       }
     }
+
+    /**
+     * Display projects as checkboxes
+     */
+    function displayProjects(projects) {
+      loadedProjects = projects || [];
+      // Keep only selections that still exist in the loaded project list
+      selectedProjectsSet = new Set(
+        Array.from(selectedProjectsSet).filter(name =>
+          loadedProjects.some(project => project.name === name)
+        )
+      );
+      localStorage.setItem('selectedProjects', JSON.stringify(Array.from(selectedProjectsSet)));
+
+      currentProjectPage = 1;
+      renderProjectPage();
+      updateProjectPagination();
+    }
+
+    /**
+     * Render a single page of projects with pagination
+     */
+    function renderProjectPage() {
+      const container = document.getElementById('projectSelection');
+      container.innerHTML = '';
+
+      const startIndex = (currentProjectPage - 1) * PROJECTS_PAGE_SIZE;
+      const pageItems = loadedProjects.slice(startIndex, startIndex + PROJECTS_PAGE_SIZE);
+
+      if (pageItems.length === 0) {
+        container.innerHTML = '<p class="pagination-status" style="width:100%;text-align:center;">No projects found.</p>';
+        return;
+      }
+
+      pageItems.forEach(project => {
+        const div = document.createElement('div');
+        div.className = 'project-checkbox';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `project-${project.id}`;
+        checkbox.value = project.name;
+        checkbox.checked = selectedProjectsSet.has(project.name);
+        checkbox.addEventListener('change', (e) => handleProjectSelectionChange(e.target.value, e.target.checked));
+
+        const label = document.createElement('label');
+        label.htmlFor = `project-${project.id}`;
+        label.textContent = project.name;
+
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        container.appendChild(div);
+      });
+    }
+
+    /**
+     * Update pagination controls
+     */
+    function updateProjectPagination() {
+      const pagination = document.getElementById('projectPagination');
+      const totalPages = Math.max(1, Math.ceil(loadedProjects.length / PROJECTS_PAGE_SIZE));
+
+      pagination.innerHTML = `
+        <button onclick="changeProjectPage(-1)" ${currentProjectPage === 1 ? 'disabled' : ''}>Previous</button>
+        <span class="pagination-status">Page ${currentProjectPage} of ${totalPages}</span>
+        <button onclick="changeProjectPage(1)" ${currentProjectPage === totalPages ? 'disabled' : ''}>Next</button>
+      `;
+    }
+
+    /**
+     * Handle page change
+     */
+    function changeProjectPage(delta) {
+      const totalPages = Math.max(1, Math.ceil(loadedProjects.length / PROJECTS_PAGE_SIZE));
+      const nextPage = Math.min(totalPages, Math.max(1, currentProjectPage + delta));
+      if (nextPage !== currentProjectPage) {
+        currentProjectPage = nextPage;
+        renderProjectPage();
+        updateProjectPagination();
+      }
+    }
+
+    /**
+     * Track project selection across pages
+     */
+    function handleProjectSelectionChange(projectName, isChecked) {
+      if (isChecked) {
+        selectedProjectsSet.add(projectName);
+      } else {
+        selectedProjectsSet.delete(projectName);
+      }
+      localStorage.setItem('selectedProjects', JSON.stringify(Array.from(selectedProjectsSet)));
+    }
+
+    /**
+     * Fetch pull requests for selected projects
+     */
+    async function fetchPullRequests() {
+      const organization = document.getElementById('organization').value.trim();
+      const selectedProjects = Array.from(selectedProjectsSet);
+
+      if (selectedProjects.length === 0) {
+        alert('Please select at least one project');
+        return;
+      }
+
+      const fetchBtn = document.getElementById('fetchPRBtn');
+      fetchBtn.disabled = true;
+      fetchBtn.textContent = 'Fetching...';
+
+      try {
+        // Save selected projects (ensure latest set is persisted)
+        localStorage.setItem('selectedProjects', JSON.stringify(selectedProjects));
+
+        allPullRequests = [];
+
+        for (const project of selectedProjects) {
+          const response = await callAzureDevOpsAPI(
+            `https://dev.azure.com/${organization}/${project}/_apis/git/pullrequests?searchCriteria.status=active&api-version=7.1`
+          );
+          const data = await response.json();
+
+          data.value.forEach(pr => {
+            pr.projectName = project;
+            allPullRequests.push(pr);
+          });
+        }
+
+        filterPullRequests();
+        updateLastRefreshed();
+
+      } catch (error) {
+        console.error('Error fetching pull requests:', error);
+        alert('Failed to fetch pull requests: ' + error.message);
+      } finally {
+        fetchBtn.disabled = false;
+        fetchBtn.textContent = 'Fetch Pull Requests';
+      }
+    }
+
+    /**
+     * Filter and display pull requests
+     */
+    function filterPullRequests() {
+      const hideDrafts = document.getElementById('hideDrafts').checked;
+
+      let filteredPRs = allPullRequests;
+      if (hideDrafts) {
+        filteredPRs = allPullRequests.filter(pr => !pr.isDraft);
+      }
+
+      // Sort by creation date (newest first)
+      filteredPRs = filteredPRs.slice().sort((a, b) => new Date(b.creationDate) - new Date(a.creationDate));
+
+      displayPullRequests(filteredPRs);
+    }
+
+    /**
+     * Display pull requests
+     */
+    function displayPullRequests(pullRequests) {
+      const container = document.getElementById('prList');
+      container.innerHTML = '';
+
+      if (pullRequests.length === 0) {
+        container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Pull Requests Found</h3>
+                        <p>There are no open pull requests in the selected projects.</p>
+                    </div>
+                `;
+        document.getElementById('prCount').textContent = '0 pull requests';
+        return;
+      }
+
+      pullRequests.forEach(pr => {
+        const card = createPRCard(pr);
+        container.appendChild(card);
+      });
+
+      document.getElementById('prCount').textContent = `${pullRequests.length} pull request${pullRequests.length !== 1 ? 's' : ''}`;
+    }
+
+    /**
+     * Build a direct Azure DevOps PR link from organization/project/repo/PR id.
+     * Falls back to server-provided web link or API link if any piece is missing.
+     */
+    function buildPullRequestLink(pr) {
+      const orgInput = document.getElementById('organization');
+      const org = (orgInput ? orgInput.value.trim() : '') || localStorage.getItem('organization') || '';
+
+      if (org && pr.projectName && pr.repository && pr.repository.name && pr.pullRequestId) {
+        const orgEnc = encodeURIComponent(org);
+        const projectEnc = encodeURIComponent(pr.projectName);
+        const repoEnc = encodeURIComponent(pr.repository.name);
+        return `https://dev.azure.com/${orgEnc}/${projectEnc}/_git/${repoEnc}/pullrequest/${pr.pullRequestId}`;
+      }
+
+      if (pr._links && pr._links.web && pr._links.web.href) return pr._links.web.href;
+      return pr.url;
+    }
+
+    /**
+     * Create PR card element
+     */
+    function createPRCard(pr) {
+      const card = document.createElement('div');
+      card.className = 'pr-card';
+
+      if (pr.isDraft) {
+        card.classList.add('draft');
+      }
+
+      const age = calculateAge(pr.creationDate);
+      if (age.days > 7) {
+        card.classList.add('critical');
+      } else if (age.days > 3) {
+        card.classList.add('warning');
+      }
+
+      const ageClass = age.days > 7 ? 'critical' : age.days > 3 ? 'warning' : '';
+      const sourceBranch = escapeHtml(pr.sourceRefName.replace('refs/heads/', ''));
+      const targetBranch = escapeHtml(pr.targetRefName.replace('refs/heads/', ''));
+      const webLink = buildPullRequestLink(pr);
+
+      card.innerHTML = `
+        <div class="pr-header">
+          <div class="pr-title-block">
+            <a href="${webLink}" target="_blank" class="pr-title">
+              ${pr.isDraft ? '📝 ' : ''}${escapeHtml(pr.title)}
+            </a>
+            <div class="pr-tags">
+              <span class="pill">${escapeHtml(pr.projectName)}</span>
+              <span class="pill pill-muted">${escapeHtml(pr.repository.name)}</span>
+            </div>
+          </div>
+          <span class="pr-age ${ageClass}">${age.text}</span>
+        </div>
+        <div class="pr-meta">
+          <div class="meta-item">
+            <span class="meta-icon">🗂️</span>
+            <span>${escapeHtml(pr.projectName)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📁</span>
+            <span>${escapeHtml(pr.repository.name)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">👤</span>
+            <span>${escapeHtml(pr.createdBy.displayName)}</span>
+          </div>
+        </div>
+        <div class="pr-branches">
+          <span class="branch-tag">${sourceBranch}</span>
+          <span class="branch-sep">→</span>
+          <span class="branch-tag">${targetBranch}</span>
+        </div>
+      `;
+
+      return card;
+    }
+
+    /**
+     * Calculate age of PR
+     */
+    function calculateAge(creationDate) {
+      const created = new Date(creationDate);
+      const now = new Date();
+      const diffTime = Math.abs(now - created);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+
+      if (diffDays === 0) {
+        return { days: 0, text: `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago` };
+      } else {
+        return { days: diffDays, text: `${diffDays} day${diffDays !== 1 ? 's' : ''} ago` };
+      }
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    /**
+     * Update last refreshed timestamp
+     */
+    function updateLastRefreshed() {
+      const now = new Date();
+      document.getElementById('lastRefreshed').textContent =
+        `Last refreshed: ${now.toLocaleTimeString()}`;
+    }
+
+    // ============================================
+    // AUTO-REFRESH FUNCTIONS
+    // ============================================
+
+    /**
+     * Update auto-refresh settings
+     */
+    function updateAutoRefresh() {
+      const interval = parseInt(document.getElementById('autoRefresh').value);
+
+      // Save preference
+      localStorage.setItem('autoRefreshInterval', interval.toString());
+
+      // Clear existing intervals
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+
+      // Hide countdown
+      document.getElementById('nextRefresh').style.display = 'none';
+
+      if (interval > 0) {
+        // Set new interval
+        nextRefreshTime = Date.now() + interval;
+        autoRefreshInterval = setInterval(fetchPullRequests, interval);
+
+        // Start countdown
+        document.getElementById('nextRefresh').style.display = 'inline';
+        countdownInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+      }
+    }
+
+    /**
+     * Update countdown display
+     */
+    function updateCountdown() {
+      if (!nextRefreshTime) return;
+
+      const remaining = Math.max(0, nextRefreshTime - Date.now());
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+
+      document.getElementById('nextRefresh').textContent =
+        `Next refresh in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+      if (remaining === 0) {
+        const interval = parseInt(document.getElementById('autoRefresh').value);
+        nextRefreshTime = Date.now() + interval;
+      }
+    }
+
+    // ============================================
+    // THEME FUNCTIONS
+    // ============================================
+
+    /**
+     * Toggle dark/light theme
+     */
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    /**
+     * Load saved preferences
+     */
+    function loadPreferences() {
+      // Load theme
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+
+      // Load organization
+      const savedOrg = localStorage.getItem('organization');
+      if (savedOrg) {
+        document.getElementById('organization').value = savedOrg;
+      }
+
+      // Load config collapse state
+      const isConfigCollapsed = localStorage.getItem('configCollapsed') === 'true';
+      setConfigCollapsed(isConfigCollapsed);
+
+      // Load auto-refresh
+      const savedInterval = localStorage.getItem('autoRefreshInterval');
+      if (savedInterval) {
+        document.getElementById('autoRefresh').value = savedInterval;
+      }
+
+      // Load hide drafts
+      const hideDrafts = localStorage.getItem('hideDrafts') === 'true';
+      document.getElementById('hideDrafts').checked = hideDrafts;
+    }
+
+    /**
+     * Collapse/expand configuration section and persist preference
+     */
+    function setConfigCollapsed(collapsed) {
+      const section = document.getElementById('configSection');
+      const body = document.getElementById('configBody');
+      const toggleBtn = document.getElementById('configCollapseToggle');
+      if (!section || !body || !toggleBtn) return;
+
+      if (collapsed) {
+        section.classList.add('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.querySelector('.collapse-label').textContent = 'Expand';
+      } else {
+        section.classList.remove('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.querySelector('.collapse-label').textContent = 'Collapse';
+      }
+      localStorage.setItem('configCollapsed', collapsed.toString());
+    }
+
+    function toggleConfigCollapse() {
+      const section = document.getElementById('configSection');
+      const collapsed = section.classList.contains('collapsed');
+      setConfigCollapsed(!collapsed);
+    }
+
+    /**
+     * Save hide drafts preference
+     */
+    document.getElementById('hideDrafts').addEventListener('change', function () {
+      localStorage.setItem('hideDrafts', this.checked);
+    });
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+
+    /**
+     * Check authentication status on page load
+     */
+    async function checkAuthStatus() {
+      // Apply saved theme and preferences immediately
+      loadPreferences();
+
+      if (!validateEnvironment()) {
+        clearAuthQueryParams();
+        return;
+      }
+
+      // Handle OAuth callback first
+      await handleOAuthCallback();
+
+      // Check if user is already authenticated
+      const accessToken = sessionStorage.getItem('access_token');
+      if (accessToken) {
+        await initializeAuthenticatedApp();
+      }
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', checkAuthStatus);
   </script>
 </body>
 
