@@ -619,65 +619,52 @@
 
     /* PR list */
     .pr-list {
-      display: grid;
-      gap: var(--space-3);
+      display: block;
+      width: 100%;
     }
 
-    .pr-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .pr-card {
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
       background: var(--surface);
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-soft);
-      padding: var(--space-3);
-      transition: transform var(--transition-base), box-shadow var(--transition-base);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-      border-left: 6px solid var(--primary);
     }
 
-    .pr-card:hover {
-      transform: translateY(-1px) scale(1.005);
-      box-shadow: var(--shadow-hover);
+    .pr-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 960px;
     }
 
-    .pr-card.warning {
-      border-left-color: var(--warning);
+    .pr-table th,
+    .pr-table td {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: var(--text-sm);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
     }
 
-    .pr-card.critical {
-      border-left-color: var(--danger);
+    .pr-table th {
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: var(--surface-muted);
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
-    .pr-card.draft {
-      opacity: 0.95;
-      border-style: dashed;
-    }
-
-    .pr-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: var(--space-3);
-      flex-wrap: wrap;
-    }
-
-    .pr-title-block {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-      min-width: 0;
+    .pr-table tr:last-child td {
+      border-bottom: none;
     }
 
     .pr-title {
-      font-size: var(--text-lg);
-      font-weight: 700;
       color: var(--primary);
+      font-weight: 700;
       line-height: var(--leading-tight);
+      display: inline-block;
       word-break: break-word;
     }
 
@@ -685,103 +672,42 @@
       text-decoration: underline;
     }
 
-    .pr-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-1);
-      align-items: center;
-    }
-
-    .pill {
+    .branch-chip {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       padding: 6px 8px;
-      border-radius: 999px;
-      background: rgba(0, 120, 212, 0.12);
-      color: var(--primary);
-      font-size: var(--text-xs);
-      font-weight: 700;
-      border: 1px solid rgba(0, 120, 212, 0.25);
-    }
-
-    .pill-muted {
+      border-radius: var(--radius-sm);
       background: var(--surface-muted);
-      border-color: var(--border);
-      color: var(--text-secondary);
-      font-weight: 600;
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-primary);
     }
 
-    .pr-age {
-      font-size: var(--text-xs);
+    .age-badge {
+      display: inline-flex;
+      align-items: center;
       padding: 6px 10px;
       border-radius: 999px;
+      font-size: var(--text-xs);
+      font-weight: 700;
       background: var(--surface-muted);
-      color: var(--text-primary);
       border: 1px solid var(--border);
+      color: var(--text-primary);
       white-space: nowrap;
     }
 
-    .pr-age.warning {
+    .age-badge.warning {
       background: rgba(245, 159, 0, 0.15);
       color: var(--warning);
       border-color: rgba(245, 159, 0, 0.4);
     }
 
-    .pr-age.critical {
+    .age-badge.critical {
       background: rgba(229, 83, 75, 0.15);
       color: var(--danger);
       border-color: rgba(229, 83, 75, 0.35);
-    }
-
-    .pr-meta {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: var(--space-1);
-    }
-
-    .meta-item {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-      padding: 8px 10px;
-      background: var(--surface-muted);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-      min-height: 44px;
-    }
-
-    .meta-icon {
-      font-size: 1rem;
-    }
-
-    .pr-branches {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      flex-wrap: wrap;
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: var(--space-1);
-      font-family: var(--font-mono);
-      font-size: var(--text-sm);
-      color: var(--text-primary);
-    }
-
-    .branch-tag {
-      padding: 6px 8px;
-      border-radius: var(--radius-sm);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .branch-sep {
-      opacity: 0.7;
     }
 
     /* Empty and loading */
@@ -948,7 +874,7 @@
       </div>
 
       <!-- Pull Requests List -->
-      <div id="prList" class="pr-list pr-grid"></div>
+      <div id="prList" class="pr-list"></div>
     </div>
   </main>
 
@@ -1650,12 +1576,53 @@
         return;
       }
 
-      pullRequests.forEach(pr => {
-        const card = createPRCard(pr);
-        container.appendChild(card);
-      });
+      const rows = pullRequests.map(pr => {
+        const age = calculateAge(pr.creationDate);
+        const ageClass = age.days > 7 ? 'critical' : age.days > 3 ? 'warning' : '';
+        const sourceBranch = escapeHtml(pr.sourceRefName.replace('refs/heads/', ''));
+        const targetBranch = escapeHtml(pr.targetRefName.replace('refs/heads/', ''));
+        const webLink = buildPullRequestLink(pr);
 
-      document.getElementById('prCount').textContent = `${pullRequests.length} pull request${pullRequests.length !== 1 ? 's' : ''}`;
+        return `
+          <tr>
+            <td>${escapeHtml(pr.projectName)}</td>
+            <td><a href="${webLink}" target="_blank" class="pr-title">${escapeHtml(pr.title)}</a></td>
+            <td>${escapeHtml(pr.repository.name)}</td>
+            <td><span class="branch-chip">${sourceBranch}</span></td>
+            <td><span class="branch-chip">${targetBranch}</span></td>
+            <td><span class="age-badge ${ageClass}">${age.text}</span></td>
+            <td>${escapeHtml(pr.createdBy.displayName)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="table-wrapper">
+          <table class="pr-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Pull Request</th>
+                <th>Repository</th>
+                <th>Source Branch</th>
+                <th>Target Branch</th>
+                <th>Age</th>
+                <th>Opened By</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      const selectedList = Array.from(selectedProjectsSet);
+      const projectsLabel = selectedList.length
+        ? ` in project${selectedList.length > 1 ? 's' : ''} ${selectedList.map(name => `<strong>${escapeHtml(name)}</strong>`).join(', ')}`
+        : '';
+      document.getElementById('prCount').innerHTML =
+        `${pullRequests.length} pull request${pullRequests.length !== 1 ? 's' : ''}${projectsLabel}.`;
     }
 
     /**
@@ -1677,65 +1644,6 @@
       return pr.url;
     }
 
-    /**
-     * Create PR card element
-     */
-    function createPRCard(pr) {
-      const card = document.createElement('div');
-      card.className = 'pr-card';
-
-      if (pr.isDraft) {
-        card.classList.add('draft');
-      }
-
-      const age = calculateAge(pr.creationDate);
-      if (age.days > 7) {
-        card.classList.add('critical');
-      } else if (age.days > 3) {
-        card.classList.add('warning');
-      }
-
-      const ageClass = age.days > 7 ? 'critical' : age.days > 3 ? 'warning' : '';
-      const sourceBranch = escapeHtml(pr.sourceRefName.replace('refs/heads/', ''));
-      const targetBranch = escapeHtml(pr.targetRefName.replace('refs/heads/', ''));
-      const webLink = buildPullRequestLink(pr);
-
-      card.innerHTML = `
-        <div class="pr-header">
-          <div class="pr-title-block">
-            <a href="${webLink}" target="_blank" class="pr-title">
-              ${pr.isDraft ? '📝 ' : ''}${escapeHtml(pr.title)}
-            </a>
-            <div class="pr-tags">
-              <span class="pill">${escapeHtml(pr.projectName)}</span>
-              <span class="pill pill-muted">${escapeHtml(pr.repository.name)}</span>
-            </div>
-          </div>
-          <span class="pr-age ${ageClass}">${age.text}</span>
-        </div>
-        <div class="pr-meta">
-          <div class="meta-item">
-            <span class="meta-icon">🗂️</span>
-            <span>${escapeHtml(pr.projectName)}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-icon">📁</span>
-            <span>${escapeHtml(pr.repository.name)}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-icon">👤</span>
-            <span>${escapeHtml(pr.createdBy.displayName)}</span>
-          </div>
-        </div>
-        <div class="pr-branches">
-          <span class="branch-tag">${sourceBranch}</span>
-          <span class="branch-sep">→</span>
-          <span class="branch-tag">${targetBranch}</span>
-        </div>
-      `;
-
-      return card;
-    }
 
     /**
      * Calculate age of PR
